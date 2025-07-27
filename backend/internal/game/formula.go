@@ -6,7 +6,12 @@ import (
 	"time"
 )
 
-func CreateFormula() (string, int) {
+type Formula struct {
+	Question string
+	Answer   int
+}
+
+func CreateFormula() Formula {
 	//式を生成する
 	operators := []string{"+", "-", "×", "÷"}
 
@@ -34,5 +39,8 @@ func CreateFormula() (string, int) {
 		Answer = randomNumber1 / randomNumber2
 	}
 
-	return Question, Answer
+	return Formula{
+		Question: Question,
+		Answer:   Answer,
+	}
 }
