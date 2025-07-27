@@ -8,41 +8,24 @@ import (
 )
 
 var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		return true // CORS対応
+		// CORS制限回避（本番は適切に制限すべき）
+		return true
 	},
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	// WebSocketにアップグレード
+func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
 		return
 	}
-	defer conn.Close()
 
-	// 最初にメッセージ送信
-	err = conn.WriteMessage(websocket.TextMessage, []byte("Hello front! by backend"))
-	if err != nil {
-		log.Println("Send error:", err)
-		return
-	}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client.hub.register <- client
 
-	// メッセージを受信して"Hello back!"を返す
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Read error:", err)
-			break
-		}
-		log.Println("Received:", string(msg))
-
-		// クライアントから受信したら返信
-		err = conn.WriteMessage(websocket.TextMessage, []byte("respone backend!"))
-		if err != nil {
-			log.Println("Write error:", err)
-			break
-		}
-	}
+	go client.writePump()
+	go client.readPump()
 }
