@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <>
       <h1>Home</h1>
-
+      <p>aaaaaa</p>
       <Link href={"/start"}><button>Start へ</button></Link>
       <button onClick={() => sendToBack()}>hello backend!</button>
 
