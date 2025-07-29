@@ -31,11 +31,16 @@ export default function Home() {
 
   return (
     <>
-      <h1>Home</h1>
+      <h1> Zerofy</h1>
 
       <Link href={"/start"}><button>Start へ</button></Link>
       <button onClick={() => sendToBack()}>hello backend!</button>
+      <div className='menu'>
+      <button>オンラインでマッチング</button>
+      <button>友達と遊ぶ</button>
+      <button>ルール説明</button>
 
+      </div>
       <ul>
         <li>バックエンドから</li>
         {messages.map((m, i) => (
