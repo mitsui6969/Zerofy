@@ -2,29 +2,35 @@ package game
 
 import "sync"
 
-var (
+// 使う変数を構造体にする
+type gameState struct {
 	winner        string
 	mu            sync.Mutex
 	currentAnswer int
-)
+}
+
+// 戻り値を構造体にする
+type JudgementResult struct {
+	winnerID string
+}
 
 // 正解の変数をCorrectAnswerにしています
-func Judgement(ID string, answer int, CorrectAnswer int) string {
+func (g *gameState) Judgement(ID string, answer int, CorrectAnswer int) JudgementResult {
 	// 排他的処理
-	mu.Lock()
-	defer mu.Unlock()
+	g.mu.Lock()
+	defer g.mu.Unlock()
 
 	// 答えが変わったらwinnerをリセットする
-	if currentAnswer != CorrectAnswer {
-		currentAnswer = CorrectAnswer
-		winner = ""
+	if g.currentAnswer != CorrectAnswer {
+		g.currentAnswer = CorrectAnswer
+		g.winner = ""
 	}
 
 	// 正誤判定と一番最初かどうか
-	if winner == "" && answer == CorrectAnswer {
-		winner = ID
+	if g.winner == "" && answer == CorrectAnswer {
+		g.winner = ID
 	}
 
 	//勝者を返す。正解者がいなかったら""になる
-	return winner
+	return JudgementResult{winnerID: g.winner}
 }
