@@ -3,8 +3,9 @@ package game
 import "sync"
 
 var (
-	winner string
-	mu     sync.Mutex
+	winner        string
+	mu            sync.Mutex
+	currentAnswer int
 )
 
 // 正解の変数をCorrectAnswerにしています
@@ -12,6 +13,12 @@ func Judgement(ID string, answer int, CorrectAnswer int) string {
 	// 排他的処理
 	mu.Lock()
 	defer mu.Unlock()
+
+	// 答えが変わったらwinnerをリセットする
+	if currentAnswer != CorrectAnswer {
+		currentAnswer = CorrectAnswer
+		winner = ""
+	}
 
 	// 正誤判定と一番最初かどうか
 	if winner == "" && answer == CorrectAnswer {
