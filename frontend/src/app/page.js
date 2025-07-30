@@ -35,11 +35,16 @@ export default function Home() {
 
       <Link href={"/start"}><button>Start へ</button></Link>
       <button onClick={() => sendToBack()}>hello backend!</button>
-      <div className='menu'>
-      <button>オンラインでマッチング</button>
-      <button>友達と遊ぶ</button>
-      <button>ルール説明</button>
+      
+      
 
+      <div className='menu'>
+        <Link href='/game'>
+          <button>オンラインでマッチング</button>
+        </Link>
+      
+        <button>友達と遊ぶ</button>
+        <button>ルール説明</button>
       </div>
       <ul>
         <li>バックエンドから</li>
