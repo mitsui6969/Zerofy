@@ -38,13 +38,23 @@ export default function Home() {
       
       
 
-      <div className='menu'>
-        <Link href='/game'>
-          <button>オンラインでマッチング</button>
-        </Link>
+      <div className='container'>
+        <h1 className='title'>Zerofy</h1>
       
-        <button>友達と遊ぶ</button>
-        <button>ルール説明</button>
+        <input
+          type='text'
+          placeholder='任意'
+          className='usernameInput'
+          />
+        
+        <div className='menu'>
+          <Link href='/game'>
+            <button>オンラインでマッチング</button>
+          </Link>
+      
+            <button>友達と遊ぶ</button>
+            <button>ルール説明</button>
+        </div>
       </div>
       <ul>
         <li>バックエンドから</li>
