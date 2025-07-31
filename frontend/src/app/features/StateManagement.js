@@ -3,12 +3,11 @@ class StatePointManagement {
     ID; // プレイヤーID
     point; // プレイヤーのポイント
     Bet; // プレイヤーの直近の回答
-    CanBet = false; // プレイヤーの回答が適切かどうか
 
     // コンストラクタ
-    constructor(ID, point) {
+    constructor(ID) {
         this.ID = ID;
-        this.point = point;
+        this.point = 20;
     }
 
     // 回答の記録
@@ -20,7 +19,9 @@ class StatePointManagement {
         this.Bet = (this.Bet < 1 || 9 < this.Bet || this.Bet % 1 !== 0) ? NaN : this.Bet;
 
         // 要件にあっていないときfalseをかえす
-        this.CanBet = !(Number.isNaN(this.Bet));
+        if(Number.isNaN(this.Bet)) {
+            throw new Error("Not Correctly answer");
+        }
     }
 
     // ポイントの更新
@@ -36,6 +37,8 @@ class StatePointManagement {
         console.log(`CanBet  : ${this.CanBet}`);
     }
 }
+
+// ラウンド全体のプレイヤー管理
 class RoundStateManagement {
     myself;
     enemy;
