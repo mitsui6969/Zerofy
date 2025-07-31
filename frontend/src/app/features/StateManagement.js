@@ -18,7 +18,7 @@ class StatePointManagement {
 
         this.Bet = (this.Bet < 1 || 9 < this.Bet || this.Bet % 1 !== 0) ? NaN : this.Bet;
 
-        // 要件にあっていないときfalseをかえす
+        // 要件にあっていないときエラーをかえす
         if(Number.isNaN(this.Bet)) {
             throw new Error("Not Correctly answer");
         }
