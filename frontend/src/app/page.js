@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-
+import "./style/home.css";
 
 export default function Home() {
   const [socket, setSocket] = useState(null);
@@ -33,8 +33,7 @@ export default function Home() {
     <>
       <h1> Zerofy</h1>
 
-      <Link href={"/start"}><button>Start へ</button></Link>
-      <button onClick={() => sendToBack()}>hello backend!</button>
+      
       
       
 
