@@ -20,7 +20,9 @@ class StatePointManagement {
         this.Bet = (this.Bet < 1 || 9 < this.Bet || this.Bet % 1 !== 0) ? NaN : this.Bet;
 
         // 要件にあっていないときfalseをかえす
-        this.CanBet = !(Number.isNaN(this.Bet));
+        if(Number.isNaN(this.Bet)) {
+            throw new Error("Not Correctly answer");
+        }
     }
 
     // ポイントの更新
@@ -36,6 +38,8 @@ class StatePointManagement {
         console.log(`CanBet  : ${this.CanBet}`);
     }
 }
+
+// ラウンド全体のプレイヤー管理
 class RoundStateManagement {
     myself;
     enemy;
