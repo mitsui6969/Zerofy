@@ -1,6 +1,8 @@
 .my-title {
     font-size: 36px;
     margin-bottom:12px;
+    background-color: #dc4e4e;
+    display: inline-block;
 }
 .my-point {
     margin-bottom: 24px;
@@ -24,5 +26,5 @@
     margin-right: auto;
     width: 120;
     height: 60;
-    background-color: #e10c0f;
+    background-color: #dc4e4e;
 }
