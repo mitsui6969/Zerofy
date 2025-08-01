@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import '../../style/point.css';
 export default function BetPhase({ ws }) {
     const [bet, setBet] = useState(1);
 
@@ -12,19 +12,19 @@ export default function BetPhase({ ws }) {
 
     return (
         <div>
-        <h2 className="text-xl font-bold mb-4">ポイントを賭け</h2>
+        <h1 className="my-title">ポイント賭け</h1>
+        <div className="my-point">{bet}</div>
         <input
             type="range"
             min={1}
             max={10}
             value={bet}
             onChange={(e) => setBet(parseInt(e.target.value))}
-            className="border p-2 mr-2"
+            className="my-slider"
         />
-        <div className="mb-4 text-center font-semibold">{bet} ポイント</div>
         <button
             onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="my-button"
         >
             決定
         </button>
