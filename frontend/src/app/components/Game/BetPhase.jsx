@@ -12,15 +12,16 @@ export default function BetPhase({ ws }) {
 
     return (
         <div>
-        <h2 className="text-xl font-bold mb-4">ポイントを賭けてください (1〜9)</h2>
+        <h2 className="text-xl font-bold mb-4">ポイントを賭け</h2>
         <input
-            type="number"
+            type="range"
             min={1}
-            max={9}
+            max={10}
             value={bet}
             onChange={(e) => setBet(parseInt(e.target.value))}
             className="border p-2 mr-2"
         />
+        <div className="mb-4 text-center font-semibold">{bet} ポイント</div>
         <button
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded"
