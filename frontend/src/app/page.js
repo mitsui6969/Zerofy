@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-
+import "./style/home.css";
 
 export default function Home() {
   const [socket, setSocket] = useState(null);
@@ -31,11 +31,30 @@ export default function Home() {
 
   return (
     <>
-      <h1>Home</h1>
+      <h1> Zerofy</h1>
 
-      <Link href={"/start"}><button>Start へ</button></Link>
-      <button onClick={() => sendToBack()}>hello backend!</button>
+      
+      
+      
 
+      <div className='container'>
+        <h1 className='title'>Zerofy</h1>
+      
+        <input
+          type='text'
+          placeholder='任意'
+          className='usernameInput'
+          />
+        
+        <div className='menu'>
+          <Link href='/game'>
+            <button>オンラインでマッチング</button>
+          </Link>
+      
+            <button>友達と遊ぶ</button>
+            <button>ルール説明</button>
+        </div>
+      </div>
       <ul>
         <li>バックエンドから</li>
         {messages.map((m, i) => (
