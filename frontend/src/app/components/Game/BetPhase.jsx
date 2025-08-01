@@ -26,7 +26,7 @@ export default function BetPhase({ ws }) {
             onClick={handleSubmit}
             className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-            送信
+            決定
         </button>
         </div>
     );
