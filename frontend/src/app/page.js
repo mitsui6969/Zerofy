@@ -6,6 +6,7 @@ import "./style/home.css";
 export default function Home() {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [showModal, setShowModal] = useState(false); // ← モーダル表示用の状態
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080/ws");
@@ -52,15 +53,33 @@ export default function Home() {
           </Link>
       
             <button>友達と遊ぶ</button>
-            <button>ルール説明</button>
+            <button onClick={() => setShowModal(true)}>ルール説明</button>
         </div>
       </div>
-      <ul>
-        <li>バックエンドから</li>
-        {messages.map((m, i) => (
-          <li key={i}>{m}</li>
-        ))}
-      </ul>
+      
+      {showModal && (
+  <div className='modal-overlay' onClick={() => setShowModal(false)}>
+    <div className='modal-content' onClick={(e) => e.stopPropagation()}>
+      
+      <h2>計算対戦</h2>
+      
+      <div className = 'sub_box'>
+      <p>
+        ゲームのルール
+        <br />
+        1.
+        <br />
+        2.
+      </p>
+    </div>
+    
+      <button className='close-button' onClick={()=> setShowModal(false)}>
+        閉じる
+      </button>
+    </div>
+  </div>
+)}
+
     </>
   );
 }
