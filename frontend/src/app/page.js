@@ -1,37 +1,49 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation"; 
 import "./style/home.css";
+import { useSocketStore } from "./store/socketStore";
 import"./style/sub_box.css";
+
 export default function Home() {
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [showModal, setShowModal] = useState(false); // ← モーダル表示用の状態
+  const [showModal, setShowModal] = useState(false);
+  const [playerName, setPlayerName] = useState("test player");
+  const [roomID, setRoomID] = useState(""); // 友達のルームID入力用
+  const router = useRouter();
 
-  useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080/ws");
-    ws.onopen = () => console.log("Connected to WebSocket");
+  // Zustandストアから必要な関数と状態を取得
+  const connect = useSocketStore((state) => state.connect);
+  const sendMessage = useSocketStore((state) => state.sendMessage);
+  const room = useSocketStore((state) => state.room);
+  const isConnected = useSocketStore((state) => state.isConnected);
 
-    ws.onmessage = (e) => {
-      setMessages((prev) => [...prev, e.data]);
+  // マッチングボタンがクリックされたときの処理
+  const handleMatchmakingClick = () => {
+    // 接続されていなければ接続処理を開始するだけ
+    if (!isConnected) {
+      // connect();
+      if (isConnected) return; // 接続済みなら何もしない
+
+    const message = {
+      type: "JOIN",
+      roomID: roomID, // ランダムマッチングなので空
+      playerName: playerName || `Guest-${Math.floor(Math.random() * 1000)}`,
+      friend: false,
     };
-
-    ws.onerror = (e) => console.error("WebSocket error:", e);
-    ws.onclose = () => console.log("WebSocket closed");
-
-    setSocket(ws);
-
-    return () => ws.close();
-  }, []);
-
-  const sendToBack = () => {
-    if (socket?.readyState === WebSocket.OPEN) {
-      socket.send("Hi from front");
+    connect(message); // 作成したメッセージを渡して接続開始
     }
   };
 
+  // roomの状態を監視し、ルームに参加できたらページ遷移する
+  useEffect(() => {
+    if (room) {
+      // ルーム情報がセットされたら（＝参加成功）、ゲームページに遷移
+      router.push("/game");
+    }
+  }, [room, router]);
+
   return (
-    <>  
+    <>
       <div className='container'>
         <h1 className='title'>Zerofy</h1>
       
@@ -42,16 +54,15 @@ export default function Home() {
           />
         
         <div className='menu'>
-          <Link href='/game'>
-            <button>マッチング</button>
-          </Link>
+            <button onClick={handleMatchmakingClick}>オンラインでマッチング</button>      
         </div>
+
         <div className='menu2'>
             <button>友達と遊ぶ</button>
         </div>
+
         <div className='menu3'>
             <button onClick={() => setShowModal(true)}>遊び方</button>
-
         </div>
             
         </div>
