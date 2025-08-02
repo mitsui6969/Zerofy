@@ -1,39 +1,107 @@
 package room
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
+	"math/rand"
+	"time"
 )
 
-// CreateRoom 新しいルームを作成する
-func (rm *RoomManager) CreateRoom(name string) (*Room, error) {
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+// generateRoomID ルームIDを生成（friend==trueなら4桁数字、falseなら5桁英数字）
+func GenerateRoomID(friend bool) string {
+	if friend {
+		// フレンドマッチ用4桁数字
+		return fmt.Sprintf("%04d", rand.Intn(10000))
+	}
+
+	// ランダムマッチ用5桁英数字
+	b := make([]rune, 5)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+// JoinOrCreateRoom ルームID指定なしなら自動割り当て
+func (rm *RoomManager) JoinOrCreateRoom(roomID, playerID, playerName string, friend bool) (*Room, error) {
 	rm.mutex.Lock()
-	defer rm.mutex.Unlock()
+    defer rm.mutex.Unlock()
 
-	// ルーム名の妥当性チェック
-	if len(name) == 0 || len(name) > MaxRoomNameLength {
-		return nil, ErrInvalidRoomName
+    // ルームIDが指定されている場合
+    if roomID != "" {
+        room, ok := rm.rooms[roomID]
+        if !ok {
+            // ルームが存在しなければ新規作成
+            room = NewRoom(roomID, fmt.Sprintf("Room-%s", roomID))
+            rm.rooms[roomID] = room
+        }
+
+        // 既存 or 新規ルームに参加
+        player := NewPlayer(playerID, playerName)
+        if err := room.AddPlayer(player); err != nil {
+            return nil, err
+        }
+        return room, nil
+    }
+
+	// 空きルームを探す（ランダムマッチのみ）
+	if !friend {
+		for _, r := range rm.rooms {
+			if r.IsActive && !r.IsFull() {
+				player := NewPlayer(playerID, playerName)
+				if err := r.AddPlayer(player); err == nil {
+					return r, nil
+				}
+			}
+		}
 	}
 
-	// ユニークなルームIDを生成
-	roomID := generateRoomID()
-	if _, exists := rm.rooms[roomID]; exists {
-		return nil, fmt.Errorf("room ID %s already exists", roomID)
-	}
+	// 新規ルーム作成（ランダムマッチまたはフレンドマッチ）
+    newRoomID := GenerateRoomID(friend)
+    r := NewRoom(newRoomID, fmt.Sprintf("Room-%s", newRoomID))
+    rm.rooms[newRoomID] = r
 
-	// 新しいルームを作成してマップに追加
-	room := NewRoom(roomID, name)
-	rm.rooms[roomID] = room
-	return room, nil
+    player := NewPlayer(playerID, playerName)
+    if err := r.AddPlayer(player); err != nil {
+        return nil, err
+    }
+
+    return r, nil
 }
 
-// generateRoomID ランダムなルームIDを生成
-func generateRoomID() string {
-	bytes := make([]byte, 4)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
-}
+// // CreateRoom 新しいルームを作成する
+// func (rm *RoomManager) CreateRoom(name string) (*Room, error) {
+// 	rm.mutex.Lock()
+// 	defer rm.mutex.Unlock()
+
+// 	// ルーム名の妥当性チェック
+// 	if len(name) == 0 || len(name) > MaxRoomNameLength {
+// 		return nil, ErrInvalidRoomName
+// 	}
+
+// 	// ユニークなルームIDを生成
+// 	roomID := generateRoomID(false)
+// 	if _, exists := rm.rooms[roomID]; exists {
+// 		return nil, fmt.Errorf("room ID %s already exists", roomID)
+// 	}
+
+// 	// 新しいルームを作成してマップに追加
+// 	room := NewRoom(roomID, name)
+// 	rm.rooms[roomID] = room
+// 	return room, nil
+// }
+
+// // generateRoomID ランダムなルームIDを生成
+// func generateRoomID() string {
+// 	bytes := make([]byte, 4)
+// 	rand.Read(bytes)
+// 	return hex.EncodeToString(bytes)
+// }
 
 // JoinRoom プレイヤーをルームに参加させる
 func (rm *RoomManager) JoinRoom(roomID, playerID, playerName string) error {
