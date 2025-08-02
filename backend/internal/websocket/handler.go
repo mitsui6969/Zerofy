@@ -24,6 +24,7 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
+		http.Error(w, "WebSocket upgrade failed: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -92,7 +93,20 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 
 	client.hub.register <- client
 
-	// 読み書きgoroutine開始
-	go client.writePump()
-	go client.readPump()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// panic発生時にクラッシュを防ぐ
+			}
+		}()
+		client.writePump()
+	}()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// panic発生時にクラッシュを防ぐ
+			}
+		}()
+		client.readPump()
+	}()
 }

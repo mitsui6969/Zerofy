@@ -1,24 +1,52 @@
-.menu {
+.menu,
+.menu2,
+.menu3 {
     display: flex;
     flex-direction: column;
     gap: 12px;
     width: 200px;
     margin: 20px auto;
 }
+.menu button,
+.menu2 button,
+.menu3 button {
+    padding: 12px 0;
+    width:200px;
+    font-weight:600;
+    font-size: 16px;
+    border: none;
+    border-radius: 999px; 
+    transition: background-color 0.3s ease;
+    text-align: center;      
+    box-sizing: border-box; 
+}
+
 
 .menu button {
-    padding: 10px;
-    font-size: 16px;
-    background-color: #e53935;  
-    color: white;               
-    border: none;               
-    border-radius: 6px;         
-    transition: background-color 0.3s ease;
+    background-color: #cb3842; 
+    color: #FFFFFF;
 }
 
-.menu button:hover {
-    background-color: #d32f2f; 
+.menu2 button {
+    background-color:#cb3842 ; 
+    color: #FFFFFF;
 }
+
+.menu3 button {
+    background-color:#000 ; 
+    color:#FFFFFF;
+}
+
+
+.menu button:hover,
+.menu2 button:hover {
+    background-color: #ab1b1b; 
+}
+.menu3 button:hover{
+    background-color:#727272;
+}
+
+
 .container {
     display: flex;
     flex-direction: column;
@@ -56,7 +84,7 @@
     background: white;
     padding: 30px;
     border-radius: 10px;
-    max-width: 500px;
+    max-width: 600px;
     width: 90%;
     position: relative;
 }
@@ -90,6 +118,13 @@
     cursor: pointer;
 }
 
-.close-btn:hover {
+.close-btutton {
     background-color: #d32f2f;
+}
+body{
+    background-color:#000;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
 }

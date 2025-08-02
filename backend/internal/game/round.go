@@ -53,3 +53,23 @@ func (r *Round) NextState() {
 		r.state = StateResult
 	}
 }
+
+func (r *Round) AddPlayer(playerID string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	// 空文字チェック
+	if playerID == "" {
+		return ErrInvalidParameter
+	}
+
+	// 重複チェック
+	for _, p := range r.players {
+		if p == playerID {
+			return ErrInvalidParameter // すでに参加済み
+		}
+	}
+
+	r.players = append(r.players, playerID)
+	return nil
+}
