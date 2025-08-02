@@ -41,3 +41,22 @@
     color: #FFFF;
     z-index: 1;
 }
+.cancel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+.cancel button {
+    background-color: #cb3842;
+    color: #fff;
+    border: none;
+    padding: 20px 30px;
+    font-size: 14px;
+    border-radius: 15px;
+}
+
+.cancel button:hover {
+    background-color: #ab1b1b;
+}
