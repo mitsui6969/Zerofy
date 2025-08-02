@@ -44,8 +44,7 @@ func (c *Client) readPump() {
 			break
 		}
 
-		log.Printf("[DEBUG] raw bytes: %s\n", string(message))
-		log.Printf("[WS] 受け取ったよ roomID: %s, Massage: %s\n", string(c.room.ID), string(message)) // 受け取りログ
+		log.Printf("[WS] 受け取ったよ roomID: %s, playerID: %s\n", string(c.room.ID), string(c.playerID)) // 受け取りログ
 
 		c.hub.broadcast <- Broadcast{
 			RoomID:  c.room.ID,
