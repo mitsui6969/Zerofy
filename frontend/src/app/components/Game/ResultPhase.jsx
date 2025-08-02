@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function ResultPhase({ data }) {
     const { winnerID, yourPoints, opponentPoints } = data;
-
+    
     return (
         <div>
         <h2 className="text-xl font-bold mb-4">ラウンド結果</h2>
