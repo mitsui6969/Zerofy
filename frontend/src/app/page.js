@@ -43,7 +43,7 @@ export default function Home() {
         
         <div className='menu'>
           <Link href='/game'>
-            <button>マッチング</button>
+            <button onClick={() => setPhase('WAIT')}>マッチング</button>
           </Link>
         </div>
         <div className='menu2'>
