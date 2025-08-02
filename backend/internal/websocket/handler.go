@@ -58,12 +58,26 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	// ルームID判定
 	isFriend := false
 	if joinMsg.RoomID == "" {
-		// 空ならランダム5文字
-		joinMsg.RoomID = room.GenerateRoomID(false)
+		// 空なら、まず1人だけの既存ルームを探す
+		var singleRoom *room.Room
+		for _, r := range rm.GetAllRooms() { // RoomManagerに全ルーム取得メソッドが必要
+			if !r.IsFull() && len(r.Players) == 1 && !r.IsFriend {
+				singleRoom = r
+				break
+			}
+		}
+
+		if singleRoom != nil {
+			joinMsg.RoomID = singleRoom.ID
+		} else {
+			// 見つからなければ新規作成
+			joinMsg.RoomID = room.GenerateRoomID(false)
+		}
 	} else if len(joinMsg.RoomID) == 4 {
 		// 4桁数字ならフレンドマッチ
 		isFriend = true
 	}
+
 
 	joinedRoom, err := rm.JoinOrCreateRoom(joinMsg.RoomID, playerID, joinMsg.PlayerName, isFriend)
 	if err != nil {
@@ -73,11 +87,12 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+
 	// ★参加成功のメッセージをクライアントに返す
     // これにより、フロントエンドはページ遷移のタイミングを知ることができる
     joinSuccessMsg := map[string]interface{}{
         "type": "JOIN_SUCCESS",
-        "room": joinedRoom, // ルーム情報を返す
+        "room": room.ToRoomResponse(joinedRoom), // ルーム情報を返す
     }
     res, _ := json.Marshal(joinSuccessMsg)
     conn.WriteMessage(websocket.TextMessage, res)
@@ -92,6 +107,21 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	}
 
 	client.hub.register <- client
+
+	// ★2人そろったらゲーム開始通知を全員に送信
+	if joinedRoom.IsFull() {
+		startMsg := map[string]interface{}{
+			"type": "BET",
+			"room": room.ToRoomResponse(joinedRoom), // ルーム情報を整形
+		}
+		res, _ := json.Marshal(startMsg)
+
+		// このルームにいる全員に送信
+		hub.broadcast <- Broadcast{
+            RoomID:  joinedRoom.ID,
+            Message: res,
+        }
+	}
 
 	go func() {
 		defer func() {

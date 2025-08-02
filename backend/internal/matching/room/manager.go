@@ -12,6 +12,18 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// 現在のルーム一覧を取得
+func (rm *RoomManager) GetAllRooms() []*Room {
+    rm.mutex.Lock()
+    defer rm.mutex.Unlock()
+    rooms := []*Room{}
+    for _, r := range rm.rooms {
+        rooms = append(rooms, r)
+    }
+    return rooms
+}
+
+
 // generateRoomID ルームIDを生成（friend==trueなら4桁数字、falseなら5桁英数字）
 func GenerateRoomID(friend bool) string {
 	if friend {
@@ -52,7 +64,7 @@ func (rm *RoomManager) JoinOrCreateRoom(roomID, playerID, playerName string, fri
 	// 空きルームを探す（ランダムマッチのみ）
 	if !friend {
 		for _, r := range rm.rooms {
-			if r.IsActive && !r.IsFull() {
+			if r.IsActive && !r.IsFull() && r.GetPlayerCount() == 1 {
 				player := NewPlayer(playerID, playerName)
 				if err := r.AddPlayer(player); err == nil {
 					return r, nil
