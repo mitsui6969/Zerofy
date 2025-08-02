@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import "./style/home.css";
-
+import"./style/sub_box.css";
 export default function Home() {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -31,13 +31,7 @@ export default function Home() {
   };
 
   return (
-    <>
-      <h1> Zerofy</h1>
-
-      
-      
-      
-
+    <>  
       <div className='container'>
         <h1 className='title'>Zerofy</h1>
       
@@ -51,13 +45,18 @@ export default function Home() {
           <Link href='/game'>
             <button>オンラインでマッチング</button>
           </Link>
-      
-            <button>友達と遊ぶ</button>
-            <button onClick={() => setShowModal(true)}>ルール説明</button>
         </div>
-      </div>
+        <div className='menu2'>
+            <button>友達と遊ぶ</button>
+        </div>
+        <div className='menu3'>
+            <button onClick={() => setShowModal(true)}>ルール説明</button>
+
+        </div>
+            
+        </div>
       
-      {showModal && (
+    {showModal && (
   <div className='modal-overlay' onClick={() => setShowModal(false)}>
     <div className='modal-content' onClick={(e) => e.stopPropagation()}>
       
