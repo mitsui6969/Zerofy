@@ -5,6 +5,7 @@ export default function QuestionPhase({ data, ws }) {
     const { expression } = "1+1"; // 仮のデータ
     // const { expression } = data; // 実際のデータを使用する場合はこちら
     const [answer, setAnswer] = useState('');
+    const [elapsedMs, setElapsedMs] = useState(null);
     const inputRef = useRef(null);
     // 問題表示から回答までの時間を計測するためのタイマー処理
     const startTimeRef = useRef(null);
@@ -31,22 +32,24 @@ export default function QuestionPhase({ data, ws }) {
     useEffect(() => {
         if (isStarted) {
             startTimeRef.current = Date.now();
+            setElapsedMs(null); // 問題表示時に前回のタイマーをリセット
         }
-    }, [expression, isStarted]);
+    }, [isStarted]);
 
     const handleSubmit = () => {
         const endTime = Date.now();
-        const elapsedMs = endTime - startTimeRef.current;
+        const elapsed = endTime - startTimeRef.current;
 
         ws.send(JSON.stringify({
             type: 'ANSWER',
             payload: {
                 answer: parseFloat(answer),
                 timeAt: new Date().toISOString(),
-                elapsedMs,
+                elapsedMs: elapsed,
             },
         }));
         setAnswer('');
+        setElapsedMs(elapsed); // ここで経過時間を保存
     };
 
     const handleKeyDown = (e) => {
@@ -84,6 +87,12 @@ export default function QuestionPhase({ data, ws }) {
             >
                 解答
             </button>
+            {/* ここで経過時間を表示 */}
+            {elapsedMs !== null && (
+                <p className="mt-4 text-blue-600">
+                    回答までの時間: {(elapsedMs / 1000).toFixed(2)} 秒
+                </p>
+            )}
         </div>
     );
 }
