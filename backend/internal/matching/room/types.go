@@ -18,6 +18,7 @@ type Room struct {
 	Name       string
 	MaxPlayers int
 	Players    map[string]*Player
+	IsFriend   bool
 	CreatedAt  time.Time
 	IsActive   bool
 	mutex      sync.RWMutex
