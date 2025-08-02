@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import BetPhase from '@/app/components/Game/BetPhase';
 import QuestionPhase from '@/app/components/Game/QuestionPhase';
 import ResultPhase from '@/app/components/Game/ResultPhase';
+import "../style/game.css"
 
 export default function GamePage() {
     const [phase, setPhase] = useState('WAIT'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
@@ -33,11 +34,21 @@ export default function GamePage() {
     }, []);
 
     return (
+    <div>
+        {phase === 'WAIT'? (
+        <div className="matching">
+            <div className="circle circle-top-right"></div>
+            <div className="circle circle-bottom-left"></div>
+
+            <h1>相手を探しています...</h1>   
+        </div>
+        ) : (
         <main className="p-8">
         {phase === 'BET' && <BetPhase ws={ws} />}
         {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
         {phase === 'RESULT' && <ResultPhase data={data} />}
-        {phase === 'WAIT' && <p>Waiting for opponent...</p>}
-        </main>
-    );
+        </main> 
+    )}
+</div>
+);
 }

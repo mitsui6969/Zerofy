@@ -93,6 +93,7 @@ export default function Home() {
       <li>より早く正解しよう！</li>
       <li>勝ったら賭けポイント分、減らせるよ 😊</li>
       <li>負けたら何も変わらない 😢</li>
+      <li>持ちポイントが先に0になったら勝ちだよ</li>
     </ul>
   </div>
 </div>
