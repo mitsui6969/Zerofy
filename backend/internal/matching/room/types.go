@@ -29,6 +29,13 @@ type RoomManager struct {
 	mutex sync.RWMutex
 }
 
+// Room情報をクライアント用に整形する構造体
+type RoomResponse struct {
+    ID      string   `json:"id"`
+    Players []string `json:"players"`
+    IsFull  bool     `json:"isFull"`
+}
+
 var (
 	ErrRoomNotFound    = errors.New("room not found")
 	ErrPlayerNotFound  = errors.New("player not found")
@@ -56,7 +63,7 @@ func NewRoom(id, name string) *Room {
 	return &Room{
 		ID:         id,
 		Name:       name,
-		MaxPlayers: Player_Count,
+		MaxPlayers: 2,
 		Players:    make(map[string]*Player),
 		CreatedAt:  time.Now(),
 		IsActive:   true,
@@ -67,6 +74,19 @@ func NewRoomManager() *RoomManager {
 	return &RoomManager{
 		rooms: make(map[string]*Room),
 	}
+}
+
+// Room -> RoomResponse 変換関数
+func ToRoomResponse(r *Room) RoomResponse {
+    players := []string{}
+    for _, p := range r.Players { // ここは実際のプレイヤー管理に合わせて修正
+        players = append(players, p.Name)
+    }
+    return RoomResponse{
+        ID:      r.ID,
+        Players: players,
+        IsFull:  r.IsFull(),
+    }
 }
 
 func (r *Room) IsFull() bool {

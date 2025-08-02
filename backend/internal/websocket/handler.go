@@ -87,20 +87,6 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// ★2人そろったらゲーム開始通知を全員に送信
-	if joinedRoom.IsFull() {
-		startMsg := map[string]interface{}{
-			"type": "BET",
-			"room": joinedRoom,
-		}
-		res, _ := json.Marshal(startMsg)
-
-		// このルームにいる全員に送信
-		for client := range hub.rooms[joinedRoom.ID] {
-			client.send <- res
-		}
-	}
-
 
 	// ★参加成功のメッセージをクライアントに返す
     // これにより、フロントエンドはページ遷移のタイミングを知ることができる
@@ -110,7 +96,6 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
     }
     res, _ := json.Marshal(joinSuccessMsg)
     conn.WriteMessage(websocket.TextMessage, res)
-
 
 	// Client作成
 	client := &Client{
@@ -122,6 +107,21 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	}
 
 	client.hub.register <- client
+
+	// ★2人そろったらゲーム開始通知を全員に送信
+	if joinedRoom.IsFull() {
+		startMsg := map[string]interface{}{
+			"type": "BET",
+			"room": room.ToRoomResponse(joinedRoom), // ルーム情報を整形
+		}
+		res, _ := json.Marshal(startMsg)
+
+		// このルームにいる全員に送信
+		hub.broadcast <- Broadcast{
+            RoomID:  joinedRoom.ID,
+            Message: res,
+        }
+	}
 
 	go func() {
 		defer func() {
