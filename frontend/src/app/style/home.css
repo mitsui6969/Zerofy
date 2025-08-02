@@ -1,17 +1,5 @@
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 200px;
-    margin: 20px auto;
-}
-.menu2 {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 200px;
-    margin: 20px auto;
-}
+.menu,
+.menu2,
 .menu3 {
     display: flex;
     flex-direction: column;
@@ -19,35 +7,36 @@
     width: 200px;
     margin: 20px auto;
 }
-
-.menu button {
-    padding: 10px;
+.menu button,
+.menu2 button,
+.menu3 button {
+    padding: 12px 0;
+    width:200px;
+    font-weight:600;
     font-size: 16px;
-    background-color: #FEDFE1; 
+    background-color: #FEDFE1;
     color: #000;
     border: none;
-    border-radius: 6px;
+    border-radius: 999px; 
     transition: background-color 0.3s ease;
+    text-align: center;      
+    box-sizing: border-box; 
+}
+
+
+.menu button {
+    background-color: #FEDFE1; 
+    color: #000;
 }
 
 .menu2 button {
-    padding: 10px;
-    font-size: 16px;
-    background-color:#654321 ; 
+    background-color:#4A0000 ; 
     color: #FFFFFF;
-    border: none;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
 }
 
 .menu3 button {
-    padding: 10px;
-    font-size: 16px;
     background-color:#000 ; 
     color:#FFFFFF;
-    border: none;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
 }
 
 
@@ -125,7 +114,7 @@
     cursor: pointer;
 }
 
-.close-btutton:hover {
+.close-btutton {
     background-color: #d32f2f;
 }
 body{

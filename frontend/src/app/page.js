@@ -43,14 +43,14 @@ export default function Home() {
         
         <div className='menu'>
           <Link href='/game'>
-            <button>オンラインでマッチング</button>
+            <button>マッチング</button>
           </Link>
         </div>
         <div className='menu2'>
             <button>友達と遊ぶ</button>
         </div>
         <div className='menu3'>
-            <button onClick={() => setShowModal(true)}>ルール説明</button>
+            <button onClick={() => setShowModal(true)}>遊び方</button>
 
         </div>
             
