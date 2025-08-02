@@ -15,22 +15,34 @@ type JudgementResult struct {
 }
 
 // 正解の変数をCorrectAnswerにしています
-func (g *gameState) Judgement(ID string, answer int, CorrectAnswer int) JudgementResult {
-	// 排他的処理
+func (g *gameState) Judgement(ID string, answer int, CorrectAnswer int, players []string) (JudgementResult, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
-	// 答えが変わったらwinnerをリセットする
+	// IDが空文字の場合
+	if ID == "" {
+		return JudgementResult{}, ErrInvalidParameter
+	}
+
+	// 未登録プレイヤーの場合
+	found := false
+	for _, p := range players {
+		if p == ID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return JudgementResult{}, ErrInvalidParameter
+	}
+
 	if g.currentAnswer != CorrectAnswer {
 		g.currentAnswer = CorrectAnswer
 		g.winner = ""
 	}
-
-	// 正誤判定と一番最初かどうか
 	if g.winner == "" && answer == CorrectAnswer {
 		g.winner = ID
 	}
 
-	//勝者を返す。正解者がいなかったら""になる
-	return JudgementResult{winnerID: g.winner}
+	return JudgementResult{winnerID: g.winner}, nil
 }
