@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function QuestionPhase({ data, ws }) {
     const { expression } = data;
     const [answer, setAnswer] = useState('');
+    const startTimeRef = useRef(null);
+
+    useEffect(() => {
+        startTimeRef.current = Date.now(); // 問題表示時に開始時刻記録
+    }, [expression]);
 
     const handleSubmit = () => {
+        const endTime = Date.now();
+        const elapsedMs = endTime - startTimeRef.current; // 経過時間計算
+
         ws.send(JSON.stringify({
         type: 'ANSWER',
         payload: {
             answer: parseFloat(answer),
             timeAt: new Date().toISOString(),
+            elapsedMs, // 経過時間（ミリ秒）
         },
         }));
     };
