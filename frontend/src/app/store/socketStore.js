@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 export const useSocketStore = create((set, get) => ({
+    ws: null, // WebSocketのインスタンスを保持
     socket: null,
     isConnected: false,
     room: null, // 参加したルームの情報を保持
@@ -19,7 +20,7 @@ export const useSocketStore = create((set, get) => ({
             if (initialMessage) {
                 get().sendMessage(initialMessage); // ←引数を送信
             }
-            // get().sendMessage({ type: "JOIN", playerName: "Player-" + Math.floor(Math.random() * 1000) });
+            get().sendMessage("フロントから接続しました");
         };
 
         // メッセージ受信時の処理

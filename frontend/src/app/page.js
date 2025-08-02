@@ -12,6 +12,7 @@ export default function Home() {
 
   // Zustandストアから必要な関数と状態を取得
   const connect = useSocketStore((state) => state.connect);
+  const sendMessage = useSocketStore((state) => state.sendMessage);
   const room = useSocketStore((state) => state.room);
   const isConnected = useSocketStore((state) => state.isConnected);
 

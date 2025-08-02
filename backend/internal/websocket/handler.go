@@ -87,6 +87,7 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 		conn: conn,
 		send: make(chan []byte, 256),
 		room: joinedRoom,
+		playerID: playerID,
 	}
 
 	client.hub.register <- client
