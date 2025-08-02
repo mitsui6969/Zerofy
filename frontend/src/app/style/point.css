@@ -1,0 +1,30 @@
+.my-title {
+    font-size: 36px;
+    margin-bottom:12px;
+    background-color: #dc4e4e;
+    display: inline-block;
+}
+.my-point {
+    margin-bottom: 24px;
+    text-align: center;
+    width: auto;
+    font-size: 32px;
+}
+
+.my-slider {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 400px;
+    margin-bottom: 40px;
+    accent-color: #2563eb;
+}
+
+.my-button {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 120;
+    height: 60;
+    background-color: #dc4e4e;
+}
