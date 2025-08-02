@@ -16,10 +16,10 @@ const (
 )
 
 type Client struct {
-	hub     *Hub
-	conn    *websocket.Conn
-	send    chan []byte
-	room    *room.Room
+	hub      *Hub
+	conn     *websocket.Conn
+	send     chan []byte
+	room     *room.Room
 	playerID string
 }
 

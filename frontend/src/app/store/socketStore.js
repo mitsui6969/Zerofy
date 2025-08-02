@@ -1,52 +1,71 @@
-import { create } from "zustand";
-// import { atom, useAtom } from 'jotai';
-
-// const countAtom = atom(0);
+import { create } from 'zustand';
 
 export const useSocketStore = create((set, get) => ({
     socket: null,
-    messages: [],
+    isConnected: false,
+    room: null, // 参加したルームの情報を保持
 
-    connect: () => {
-        const existingSocket = get().socket;
-        if (existingSocket && existingSocket.readyState === WebSocket.OPEN) return;
+    // 1. WebSocketに接続する関数
+    connect: (initialMessage) => {
+        // 既に接続済みの場合は何もしない
+        if (get().socket) return;
 
         const ws = new WebSocket("ws://localhost:8080/ws");
 
         ws.onopen = () => {
-        console.log("✅ WebSocket connected");
+            console.log("✅ WebSocket connected!");
+            set({ socket: ws, isConnected: true });
+            // 接続が確立したらJOINメッセージを送信
+            if (initialMessage) {
+                get().sendMessage(initialMessage); // ←引数を送信
+            }
+            // get().sendMessage({ type: "JOIN", playerName: "Player-" + Math.floor(Math.random() * 1000) });
         };
 
-        ws.onmessage = (e) => {
-        const msg = JSON.parse(e.data);
-        console.log("📩 Received:", msg);
-        set((state) => ({ messages: [...state.messages, msg] }));
+        // メッセージ受信時の処理
+        ws.onmessage = (event) => {
+            console.log("✉️ Message from server: ", event.data);
+            const message = JSON.parse(event.data);
+
+            // サーバーからJOIN成功の応答を受け取ったら、room情報を更新
+            if (message.type === 'JOIN_SUCCESS') {
+                set({ room: message.room });
+            }
+            // 他のメッセージタイプに応じた処理...
         };
 
         ws.onclose = () => {
-        console.log("❌ WebSocket disconnected");
-        set({ socket: null });
+            console.log("✂️ WebSocket disconnected");
+            set({ socket: null, isConnected: false, room: null });
         };
 
-        ws.onerror = (e) => console.error("⚠️ WebSocket error:", e);
-
-        set({ socket: ws });
+        ws.onerror = (error) => {
+            console.error("❌ WebSocket error:", error);
+            set({ socket: null, isConnected: false, room: null });
+        };
     },
 
-    sendMessage: (data) => {
-        const socket = get().socket;
-        if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(data));
+    // 2. メッセージを送信する関数
+    sendMessage: (message) => {
+        const { socket } = get();
+        if (socket?.readyState === WebSocket.OPEN) {
+            try {
+                socket.send(JSON.stringify(message));
+                console.log("📤 Sent message:", message);
+            } catch(err){
+                console.error("❌✉️ Failed to send message:", err);
+            }
         } else {
-        console.warn("⚠️ WebSocket not connected");
+            console.error("❌ WebSocket is not connected.");
         }
     },
 
-    close: () => {
-        const socket = get().socket;
+    // 3. 接続を切断する関数
+    disconnect: () => {
+        const { socket } = get();
         if (socket) {
-        socket.close();
-        set({ socket: null });
+            socket.close();
         }
+        set({ socket: null, isConnected: false, room: null });
     },
 }));

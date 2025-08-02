@@ -18,12 +18,16 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Request) {
+	log.Println("New WebSocket connection request") // ★追加
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
 		return
 	}
+
+	log.Println("WebSocket connected")
 
 	// 接続直後に最初のメッセージ（JOIN）を受信
 	_, msg, err := conn.ReadMessage()
@@ -32,6 +36,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 		return
 	}
+	log.Printf("message: %s",msg);
 
 	var joinMsg JoinMessage
 	if err := json.Unmarshal(msg, &joinMsg); err != nil {
@@ -39,6 +44,7 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 		return
 	}
+	log.Printf("Received JOIN message: %+v\n", joinMsg) // ここまで成功
 
 	if joinMsg.Type != "JOIN" {
 		log.Println("First message must be JOIN")
@@ -47,7 +53,6 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
 	playerID := player.GeneratePlayerID()
-	rm := room.NewRoomManager()
 
 	// ルームID判定
 	isFriend := false
@@ -66,6 +71,15 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 		return
 	}
+
+	// ★参加成功のメッセージをクライアントに返す
+    // これにより、フロントエンドはページ遷移のタイミングを知ることができる
+    joinSuccessMsg := map[string]interface{}{
+        "type": "JOIN_SUCCESS",
+        "room": joinedRoom, // ルーム情報を返す
+    }
+    res, _ := json.Marshal(joinSuccessMsg)
+    conn.WriteMessage(websocket.TextMessage, res)
 
 	// Client作成
 	client := &Client{

@@ -5,46 +5,40 @@ import "./style/home.css";
 import { useSocketStore } from "./store/socketStore";
 
 export default function Home() {
-  const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [showModal, setShowModal] = useState(false); // ← モーダル表示用の状態
+  const [showModal, setShowModal] = useState(false);
+  const [playerName, setPlayerName] = useState("test player");
+  const [roomID, setRoomID] = useState(""); // 友達のルームID入力用
+  const router = useRouter();
 
-  const router = useRouter(); // Next.jsのルーターを使用
+  // Zustandストアから必要な関数と状態を取得
   const connect = useSocketStore((state) => state.connect);
-  const sendMessage = useSocketStore((state) => state.sendMessage);
-
-  // useEffect(() => {
-  //   const ws = new WebSocket("ws://localhost:8080/ws");
-  //   ws.onopen = () => console.log("Connected to WebSocket");
-
-  //   ws.onmessage = (e) => {
-  //     setMessages((prev) => [...prev, e.data]);
-  //   };
-
-  //   ws.onerror = (e) => console.error("WebSocket error:", e);
-  //   ws.onclose = () => console.log("WebSocket closed");
-
-  //   setSocket(ws);
-
-  //   // return () => ws.close();
-  // }, []);
-
-  // バックエンドにメッセージを送信する関数
-  const sendToBack = () => {
-    if (socket?.readyState === WebSocket.OPEN) {
-      const message = { type: "JOIN", roomID: "", playerName: "Player1", friend: false };
-      socket.send(JSON.stringify(message)); 
-      console.log("バックエンドに送ったよ!");
-    }
-  };
+  const room = useSocketStore((state) => state.room);
+  const isConnected = useSocketStore((state) => state.isConnected);
 
   // マッチングボタンがクリックされたときの処理
   const handleMatchmakingClick = () => {
-    connect(); // ページ遷移前に接続
-    sendMessage({ type: "JOIN", roomID: "", playerName: "Player1", friend: false });
-    console.log("バックエンドに送ったよ!");
-    router.push("/game");
+    // 接続されていなければ接続処理を開始するだけ
+    if (!isConnected) {
+      // connect();
+      if (isConnected) return; // 接続済みなら何もしない
+
+    const message = {
+      type: "JOIN",
+      roomID: roomID, // ランダムマッチングなので空
+      playerName: playerName || `Guest-${Math.floor(Math.random() * 1000)}`,
+      friend: false,
+    };
+    connect(message); // 作成したメッセージを渡して接続開始
+    }
   };
+
+  // roomの状態を監視し、ルームに参加できたらページ遷移する
+  useEffect(() => {
+    if (room) {
+      // ルーム情報がセットされたら（＝参加成功）、ゲームページに遷移
+      router.push("/game");
+    }
+  }, [room, router]);
 
   return (
     <>

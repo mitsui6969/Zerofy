@@ -13,9 +13,9 @@ export default function GamePage() {
     // const {messages, setMessages} = useSocketStore();
 
     useEffect(() => {
-        useSocketStore.setState((state) => ({
-            messages: [...state.messages, { type: 'WAIT' }]
-        }));
+        // useSocketStore.setState((state) => ({
+        //     messages: [...state.messages, { type: 'WAIT' }]
+        // }));
 
         // const socket = new WebSocket('ws://localhost:8080/ws');
 
