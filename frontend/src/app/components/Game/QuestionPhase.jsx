@@ -42,7 +42,7 @@ export default function QuestionPhase({ data, ws }) {
         {isStarted ? (
             <p className="text-lg mb-4">{expression} = ?</p>
         ) : (  
-            <p>スペースキーで準備完了！<br />Enterで解答を送信できます。</p>
+            <p>スペースキーで準備完了！<br />Enterで解答を送信できます！</p>
 
         )}
         <input
