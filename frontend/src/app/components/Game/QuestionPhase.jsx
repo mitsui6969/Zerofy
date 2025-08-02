@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 export default function QuestionPhase({ data, ws }) {
     const [isStarted, setIsStarted] = useState(false);
-    const { expression } = "1+1"; // 仮のデータをここに入れる
+    const { expression } = "1+1"; // 仮のデータここに入れる
     // const { expression } = data; // 実際のデータを使用する場合はこちらを有効にする
     const [answer, setAnswer] = useState('');
     

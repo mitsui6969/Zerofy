@@ -5,7 +5,7 @@ import QuestionPhase from '@/app/components/Game/QuestionPhase';
 import ResultPhase from '@/app/components/Game/ResultPhase';
 
 export default function GamePage() {
-    const [phase, setPhase] = useState('BET'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
+    const [phase, setPhase] = useState('QUESTION'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
     const [data, setData] = useState(null); // サーバーからのフェーズデータ
     const [ws, setWs] = useState(null);
 
