@@ -1,11 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-
+import "./style/home.css";
 
 export default function Home() {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [showModal, setShowModal] = useState(false); // ← モーダル表示用の状態
 
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:8080/ws");
@@ -31,17 +32,79 @@ export default function Home() {
 
   return (
     <>
-      <h1>Home</h1>
+      <h1> Zerofy</h1>
 
-      <Link href={"/start"}><button>Start へ</button></Link>
-      <button onClick={() => sendToBack()}>hello backend!</button>
+      
+      
+      
 
-      <ul>
-        <li>バックエンドから</li>
-        {messages.map((m, i) => (
-          <li key={i}>{m}</li>
-        ))}
-      </ul>
+      <div className='container'>
+        <h1 className='title'>Zerofy</h1>
+      
+        <input
+          type='text'
+          placeholder='任意'
+          className='usernameInput'
+          />
+        
+        <div className='menu'>
+          <Link href='/game'>
+            <button>オンラインでマッチング</button>
+          </Link>
+      
+            <button>友達と遊ぶ</button>
+            <button onClick={() => setShowModal(true)}>ルール説明</button>
+        </div>
+      </div>
+      
+      {showModal && (
+  <div className='modal-overlay' onClick={() => setShowModal(false)}>
+    <div className='modal-content' onClick={(e) => e.stopPropagation()}>
+      
+      <h2>計算対戦</h2>
+      
+      <div className="sub_box">
+  <h2>ゲームのルール</h2>
+
+  <div className="rule-section">
+    <h3>1. ポイントを賭けよう！</h3>
+    <ul>
+      <li>各プレイヤーは「1〜10」で賭けポイントを決めよう</li>
+      <li>持っているポイントは減らしてこう！</li>
+    </ul>
+  </div>
+
+  <div className="rule-section">
+    <h3>2. 計算しよう！ ➕ ➖ ✖️ ➗</h3>
+    <ul>
+      <li>二人とも同じ計算式を解くよ（例：1 + 1 = ?）</li>
+      <li>相手より早く解こう！</li>
+      <li>
+        <strong>※</strong> たまーに負けているプレイヤーが条件を決められる！
+        <br />
+        例：計算式に「5は出したくない」など
+      </li>
+    </ul>
+  </div>
+
+  <div className="rule-section">
+    <h3>3. 早押し勝負</h3>
+    <ul>
+      <li>より早く正解しよう！</li>
+      <li>勝ったら賭けポイント分、減らせるよ 😊</li>
+      <li>負けたら何も変わらない 😢</li>
+    </ul>
+  </div>
+</div>
+
+    
+      <button className='close-button' onClick={()=> setShowModal(false)}>
+        閉じる
+      </button>
+    </div>
+  </div>
+)}
+
     </>
   );
 }
