@@ -20,12 +20,27 @@ func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println("Upgrade error:", err)
+		http.Error(w, "WebSocket upgrade failed: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
 	client.hub.register <- client
 
-	go client.writePump()
-	go client.readPump()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// panic発生時にクラッシュを防ぐ
+			}
+		}()
+		client.writePump()
+	}()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// panic発生時にクラッシュを防ぐ
+			}
+		}()
+		client.readPump()
+	}()
 }
