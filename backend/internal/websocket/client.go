@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
 )
 
 const (
@@ -15,14 +16,17 @@ const (
 )
 
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
+	hub     *Hub
+	conn    *websocket.Conn
+	send    chan []byte
+	room    *room.Room
+	playerID string
 }
 
 func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
+		c.room.RemovePlayer(c.playerID)
 		c.conn.Close()
 	}()
 
@@ -36,10 +40,16 @@ func (c *Client) readPump() {
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
-			log.Println("read error:", err)
+			log.Printf("read error: %T %v", err, err)
 			break
 		}
-		c.hub.broadcast <- message
+
+		log.Printf("[WS] 受け取ったよ Received from %s: %s\n", c.playerID, string(message)) // 受け取りログ
+
+		c.hub.broadcast <- Broadcast{
+			RoomID:  c.room.ID,
+			Message: message,
+		}
 	}
 }
 

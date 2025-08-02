@@ -3,33 +3,40 @@ import React, { useEffect, useState } from 'react';
 import BetPhase from '@/app/components/Game/BetPhase';
 import QuestionPhase from '@/app/components/Game/QuestionPhase';
 import ResultPhase from '@/app/components/Game/ResultPhase';
+import { useSocketStore } from '../store/socketStore';
+// import { sendMessage } from '../websocket/socketClient';
 
 export default function GamePage() {
     const [phase, setPhase] = useState('BET'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
     const [data, setData] = useState(null); // サーバーからのフェーズデータ
     const [ws, setWs] = useState(null);
+    // const {messages, setMessages} = useSocketStore();
 
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:8080/ws');
+        useSocketStore.setState((state) => ({
+            messages: [...state.messages, { type: 'WAIT' }]
+        }));
 
-        socket.onopen = () => {
-        console.log('WebSocket connected');
-        };
+        // const socket = new WebSocket('ws://localhost:8080/ws');
 
-        socket.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        if (msg.type === 'PHASE') {
-            setPhase(msg.phase);   // "BET" | "QUESTION" | "RESULT"
-            setData(msg.payload);
-        }
-        };
+        // socket.onopen = () => {
+        // console.log('WebSocket connected');
+        // };
 
-        socket.onerror = console.error;
-        socket.onclose = () => console.log('WebSocket disconnected');
+        // socket.onmessage = (event) => {
+        // const msg = JSON.parse(event.data);
+        // if (msg.type === 'PHASE') {
+        //     setPhase(msg.phase);   // "BET" | "QUESTION" | "RESULT"
+        //     setData(msg.payload);
+        // }
+        // };
 
-        setWs(socket);
+        // socket.onerror = console.error;
+        // socket.onclose = () => console.log('WebSocket disconnected');
 
-        return () => socket.close();
+        // setWs(socket);
+
+        // return () => socket.close();
     }, []);
 
     return (
