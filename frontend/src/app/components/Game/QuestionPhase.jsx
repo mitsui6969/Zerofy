@@ -54,7 +54,12 @@ export default function QuestionPhase({ data, ws }) {
         <input
             type="text"
             value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
+            onChange={(e) => {
+                const value = e.target.value;
+                    if (value.match(/^[0-9.]*$/)) {
+                        setAnswer(value);
+                    }
+            }}
             onKeyDown={handleKeyDown}
             ref={inputRef}
             className="border p-2 mr-2"
