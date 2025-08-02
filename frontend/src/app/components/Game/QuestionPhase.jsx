@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function QuestionPhase({ data, ws }) {
     const [isStarted, setIsStarted] = useState(false);
     const { expression } = "1+1"; // 仮のデータここに入れる
     // const { expression } = data; // 実際のデータを使用する場合はこちらを有効にする
     const [answer, setAnswer] = useState('');
-    
+    const inputRef = useRef(null);
+
     useEffect(() => {
     const handleStartGame = (e) => {
         if (!isStarted && e.key === ' ') {
@@ -15,6 +16,11 @@ export default function QuestionPhase({ data, ws }) {
     };
 
     document.addEventListener('keydown', handleStartGame);
+
+    if (isStarted && inputRef.current) {
+            inputRef.current.focus();
+        }
+
     return () => {
         document.removeEventListener('keydown', handleStartGame);
     };
@@ -50,6 +56,7 @@ export default function QuestionPhase({ data, ws }) {
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             onKeyDown={handleKeyDown}
+            ref={inputRef}
             className="border p-2 mr-2"
         />
         <button
