@@ -1,0 +1,39 @@
+.sub_box2  {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #090000;
+    text-align: center;
+}
+.PassInput {
+  width: 70%;       /* 横幅いっぱいに広げる */
+  max-width: 200px;  /* 最大幅を300pxに */
+  height: 60px;      /* 高さを少し大きめに */
+  font-size: 30px;   /* フォントサイズを大きく */
+  padding: 20px 24px; /* 入力内の余白を広げる */
+  margin-bottom: 16px; /* 下に余白をあけてボタンと離す */
+  border-radius: 6px; /* 角丸 */
+    border: 1px solid #ccc;
+  box-sizing: border-box; /* パディング込みで幅を調整 */
+}
+
+.join-button {
+  width: 100%;        /* 横幅いっぱいに */
+  max-width: 300px;   /* 入力欄に合わせる */
+  height: 44px;       /* ボタンの高さ */
+    font-size: 18px;
+    background-color:   #cb3842;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.join-button:hover {
+  background-color: #ab1b1b; /* ホバー時に色を変える */
+}
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
