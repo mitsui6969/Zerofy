@@ -62,9 +62,10 @@ export const useSocketStore = create((set, get) => ({
                                 question: message.Question,
                                 answer: message.Answer
                             },
+                            currentPoints: message.Points || 0,
                             phase: 'QUESTION'
                         });
-                        console.log('Formula received:', message.Question);
+                        console.log('Formula received:', message.Question, 'Points:', message.Points);
                         return;
                     }
 

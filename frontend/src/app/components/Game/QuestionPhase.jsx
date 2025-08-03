@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocketStore } from '../../store/socketStore';
 
 export default function QuestionPhase() {
-    const { socket, isConnected, readyPlayers, formula, resetReadyState } = useSocketStore();
+    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState } = useSocketStore();
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
     const [isStarted, setIsStarted] = useState(false);
@@ -109,7 +109,10 @@ export default function QuestionPhase() {
             ) : (
                 <div>
                     {formula ? (
-                        <p className="text-lg mb-4">{formula.question} = ?</p>
+                        <div>
+                            <p className="text-lg mb-2">{formula.question} = ?</p>
+                            <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>
+                        </div>
                     ) : (
                         <p>問題を待機中...</p>
                     )}

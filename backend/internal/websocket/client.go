@@ -85,12 +85,13 @@ func (c *Client) readPump() {
 						c.room.GenerateFormula()
 						formula := c.room.GetFormula()
 
-						// 計算式を全員に送信
-						formulaMsg := map[string]interface{}{
-							"type":     "FORMULA",
-							"Question": formula.Question,
-							"Answer":   formula.Answer,
-						}
+						                        // 計算式を全員に送信
+                        formulaMsg := map[string]interface{}{
+                            "type":     "FORMULA",
+                            "Question": formula.Question,
+                            "Answer":   formula.Answer,
+                            "Points":   formula.Points,
+                        }
 						formulaData, _ := json.Marshal(formulaMsg)
 						c.hub.broadcast <- Broadcast{
 							RoomID:  c.room.ID,
