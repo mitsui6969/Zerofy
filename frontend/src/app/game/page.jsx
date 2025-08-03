@@ -13,10 +13,17 @@ export default function GamePage() {
     const data = useSocketStore((state) => state.room) // サーバーからのフェーズデータ
     const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
     const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
+    const gameResult = useSocketStore((state) => state.gameResult); // ゲーム結果
 
     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
     const [showMatched, setShowMatched] = useState(false);
+
+    // もう一度プレイする関数
+    const handlePlayAgain = () => {
+        // ゲームを再開する処理（必要に応じて実装）
+        console.log("Play again clicked");
+    };
 
     useEffect(() => {
         if (phase === 'QUESTION') {
@@ -60,7 +67,7 @@ export default function GamePage() {
                     {phase === 'BET' && <BetPhase ws={ws} />}
                     {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
                     {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
-                    {phase === 'END' && <EndPhase />}
+                    {phase === 'END' && <EndPhase gameResult={gameResult} />}
                     {phase === 'WAIT' && <p>Waiting for opponent...</p>}
                     </main>
                 )

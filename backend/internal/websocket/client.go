@@ -108,10 +108,10 @@ func (c *Client) readPump() {
 				if answer, ok := msg["Answer"].(float64); ok {
 					if time, ok := msg["Time"].(float64); ok {
 						if points, ok := msg["Points"].(float64); ok {
-							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f", 
+							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f",
 								c.playerID, answer, time, points)
 						} else {
-							log.Printf("Player %s answered: %v, Time: %.2fs", 
+							log.Printf("Player %s answered: %v, Time: %.2fs",
 								c.playerID, answer, time)
 						}
 					}
@@ -121,6 +121,15 @@ func (c *Client) readPump() {
 					RoomID:  c.room.ID,
 					Message: message,
 				}
+			case "GAME_END":
+				// ゲーム終了メッセージの処理
+				// このメッセージは既にゲームロジック側で作成されているので、
+				// そのままブロードキャストする
+				c.hub.broadcast <- Broadcast{
+					RoomID:  c.room.ID,
+					Message: message,
+				}
+				log.Printf("Game end message broadcasted for room: %s", c.room.ID)
 			default:
 				// その他のメッセージはブロードキャスト
 				c.hub.broadcast <- Broadcast{

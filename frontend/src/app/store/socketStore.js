@@ -12,6 +12,7 @@ export const useSocketStore = create((set, get) => ({
     currentPoints: 0, // 現在の問題のポイント
     readyPlayers: new Set(), // 準備完了したプレイヤーを管理
     formula: null, // 計算式を保持
+    gameResult: null, // ゲーム結果を保持
 
     // 1. WebSocketに接続する関数
     connect: (initialMessage) => {
@@ -65,6 +66,21 @@ export const useSocketStore = create((set, get) => ({
                             phase: 'QUESTION'
                         });
                         console.log('Formula received:', message.Question);
+                        return;
+                    }
+
+                    // ゲーム終了メッセージ
+                    if (message.type === 'GAME_END') {
+                        set({ 
+                            phase: 'END',
+                            gameResult: {
+                                winner: message.winner,
+                                winnerID: message.winnerID,
+                                roundResults: message.roundResults || [],
+                                finalScores: message.finalScores || {}
+                            }
+                        });
+                        console.log('Game end received:', message);
                         return;
                     }
 
@@ -127,3 +143,8 @@ export const useSocketStore = create((set, get) => ({
         set({ readyPlayers: new Set() });
     },
 }));
+
+// 開発環境でのみグローバルに公開
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    window.socketStore = useSocketStore;
+}

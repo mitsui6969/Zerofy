@@ -243,6 +243,20 @@ func (r *Room) HasFormula() bool {
 	return r.CurrentFormula != nil
 }
 
+// GetRoundResults ラウンド結果を取得
+func (r *Room) GetRoundResults() []RoundResult {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	return r.roundResults
+}
+
+// AddRoundResult ラウンド結果を追加
+func (r *Room) AddRoundResult(result RoundResult) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.roundResults = append(r.roundResults, result)
+}
+
 // createFormula 式を生成する（game.CreateFormulaと同じロジック）
 func (r *Room) createFormula() Formula {
 	//式を生成する
@@ -267,7 +281,7 @@ func (r *Room) createFormula() Formula {
 	//生成された式の答えを計算
 	Answer := 0
 	Points := 0 // 演算子ごとのポイント
-	
+
 	switch operator {
 	case "+":
 		Answer = randomNumber1 + randomNumber2

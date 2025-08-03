@@ -17,6 +17,22 @@ body {
   margin-bottom: 20px;
 }
 
+#winner-display {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  border: 2px solid #444;
+}
+
+#winner-display h3 {
+  font-size: 28px;
+  margin: 0;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
 #table-wrapper {
   display: flex;
   flex-direction: column;
