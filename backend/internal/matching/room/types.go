@@ -13,6 +13,11 @@ type Player struct {
 	Ready    bool
 }
 
+type RoundResult struct {
+	P1 map[string]int
+	P2 map[string]int
+}
+
 type Room struct {
 	ID         string
 	Name       string
@@ -22,6 +27,24 @@ type Room struct {
 	CreatedAt  time.Time
 	IsActive   bool
 	mutex      sync.RWMutex
+
+	roundResults []RoundResult
+}
+
+func (r *Room) AddRoundResults(P1id string, P1po int, P2id string, P2po int) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	result := RoundResult{
+		P1: map[string]int{
+			P1id: P1po,
+		},
+		P2: map[string]int{
+			P2id: P2po,
+		},
+	}
+
+	r.roundResults = append(r.roundResults, result)
 }
 
 type RoomManager struct {
