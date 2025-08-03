@@ -338,13 +338,8 @@ func (r *Room) createFormula() Formula {
 	//式を生成する
 	operators := []string{"+", "-", "×", "÷"}
 
-	// ルームIDをシードとして使用して、同じルームでは同じ式が生成されるようにする
-	var seed int64
-	for _, char := range r.ID {
-		seed += int64(char)
-	}
-
-	source := rand.NewSource(seed)
+	// 現在時刻をシードとして使用して、毎回ランダムな式が生成されるようにする
+	source := rand.NewSource(time.Now().UnixNano())
 	randGen := rand.New(source)
 
 	randomNumber1 := randGen.Intn(10) + 1
@@ -357,7 +352,7 @@ func (r *Room) createFormula() Formula {
 	//生成された式の答えを計算
 	Answer := 0
 	Points := 0 // 演算子ごとのポイント
-	
+
 	switch operator {
 	case "+":
 		Answer = randomNumber1 + randomNumber2
