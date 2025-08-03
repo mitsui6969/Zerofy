@@ -1,12 +1,15 @@
 import React from 'react';
 import '../../style/result.css';
-export default function ResultPhase({ data, onPlayAgain }) {
+
+export default function ResultPhase({ data, }) {
     //const { winnerID, yourPoints, opponentPoints } = data;
     const { 
         winnerID = 'you', 
         yourPoints = 100, 
         opponentPoints = 100 
     } = data || {};
+
+
     return (
         <div>
         <h2 className="title">Game Results</h2>
@@ -22,7 +25,7 @@ export default function ResultPhase({ data, onPlayAgain }) {
         <p className="yourpoint">相手の残りポイント:{opponentPoints}</p>
         </div>
         <div className="again">
-        <button onClick={onPlayAgain}>play again</button>
+        <p>5秒後に計算画面に戻ります</p>
         </div>
         </div>
     );

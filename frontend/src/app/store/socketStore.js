@@ -8,6 +8,7 @@ export const useSocketStore = create((set, get) => ({
     room: null, // 参加したルームの情報を保持
     player: null, // プレイヤー情報を保持
     points: 20, // 初期ポイント
+    setPhase: (newPhase) => set({ phase: newPhase }), // フェーズを更新する関数
 
     // 1. WebSocketに接続する関数
     connect: (initialMessage) => {
