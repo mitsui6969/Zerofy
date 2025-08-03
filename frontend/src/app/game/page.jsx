@@ -15,6 +15,18 @@ export default function GamePage() {
     const phase = useSocketStore((state) => state.phase); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
     const setPhase = useSocketStore((state) => state.setPhase); // フェーズを更新する関数
 
+
+    const playSound = () => {
+        const audio = new Audio("/sound/クリック.mp3");
+        audio.play();
+    };
+
+    const correctMatchingSound = () => {
+        const audio = new Audio("/sound/決定ボタンを押す5.mp3")
+        audio.play();
+    }
+
+
     const handlePlayAgain = () => {
         // 次のラウンドを開始する処理
         // ここでサーバーに次のラウンド開始を要求する
@@ -78,8 +90,10 @@ export default function GamePage() {
                     
                     {!showMatched && (
                         <div className='cancel'>
-                            <Link href='/'>
-                                <button>キャンセル</button>
+                            <Link href='/' passHref legacyBehavior>
+                                <a onClick={playSound}>
+                                    <button>キャンセル</button>
+                                </a>
                             </Link>
                         </div>
                     )}
