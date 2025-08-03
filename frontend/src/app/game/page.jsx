@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import BetPhase from '@/app/components/Game/BetPhase';
 import QuestionPhase from '@/app/components/Game/QuestionPhase';
 import ResultPhase from '@/app/components/Game/ResultPhase';
+import EndPhase from '../components/Game/EndPhase';
 
 export default function GamePage() {
-    const [phase, setPhase] = useState('QUESTION'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
+    const [phase, setPhase] = useState('END'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT' | 'END'
     const [data, setData] = useState(null); // サーバーからのフェーズデータ
     const [ws, setWs] = useState(null);
 
@@ -38,6 +39,7 @@ export default function GamePage() {
         {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
         {phase === 'RESULT' && <ResultPhase data={data} />}
         {phase === 'WAIT' && <p>Waiting for opponent...</p>}
+        {phase === 'END' && <EndPhase />}
         </main>
     );
 }
