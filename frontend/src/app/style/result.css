@@ -1,3 +1,9 @@
+.title {
+    margin-left: auto;
+    margin-top:40;
+    margin-bottom:28;
+}
+
 body {
   margin: 0;
   padding: 0;

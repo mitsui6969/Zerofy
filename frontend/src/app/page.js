@@ -23,7 +23,19 @@ export default function Home() {
     setIsMatchmaking(false);
   }, [disconnect]);
 
+  const playSound = () => {
+  const audio = new Audio("/sound/クリック.mp3");
+  audio.play();
+  };
+
+  const gameStartSound = () => {
+    const audio = new Audio("/sound/決定ボタンを押す2.mp3");
+    audio.play();
+  };
+
   const handleMatchmakingClick = () => {
+    gameStartSound();
+
     if (isConnected) return;
 
     setIsMatchmaking(true);
@@ -37,6 +49,7 @@ export default function Home() {
   };
 
   const handleJoinRoom = () => {
+    gameStartSound();
     if (!roomID || roomID.length !== 4) {
       alert("4桁のルーム番号を入力してください");
       return;
@@ -78,11 +91,11 @@ export default function Home() {
         </div>
 
         <div className='menu2'>
-          <button onClick={() => setModalType("play")}>友達と遊ぶ</button>
+          <button onClick={() => {playSound(); setModalType("play");}}>友達と遊ぶ</button>
         </div>
 
         <div className='menu3'>
-          <button onClick={() => setModalType("howto")}>遊び方</button>
+          <button onClick={() => {playSound(); setModalType("howto");}}>遊び方</button>
         </div>
       </div>
 
@@ -141,9 +154,11 @@ export default function Home() {
                   ルームに参加
                 </button>
 
-                <button className='close-friend' onClick={() => setModalType(null)}>
-                  閉じる
-                </button>
+                <button className='close-friend' onClick={() => {
+                  playSound();
+                  setModalType(null);
+                }}>閉じる</button>
+
               </>
             )}
 
@@ -182,9 +197,11 @@ export default function Home() {
                     </ul>
                   </div>
 
-                  <button className='close-howto' onClick={() => setModalType(null)}>
-                    閉じる
-                  </button>
+                  <button className='close-howto' onClick={() => {
+                    playSound();
+                    setModalType(null);
+                  }}>閉じる</button>
+
                 </div>
               </>
             )}
