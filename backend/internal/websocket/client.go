@@ -58,20 +58,50 @@ func (c *Client) readPump() {
 		if msgType, ok := msg["type"].(string); ok {
 			switch msgType {
 			case "START_GAME":
-				// ゲーム開始時にルームで生成された式を送信
-				formula := c.room.GetFormula()
-				if formula != nil {
-					jsonData, err := json.Marshal(formula)
-					if err != nil {
-						log.Printf("Failed to marshal formula: %v", err)
-						continue
-					}
-					if err := c.conn.WriteMessage(websocket.TextMessage, jsonData); err != nil {
-						log.Printf("Failed to send formula: %v", err)
-					}
-					log.Printf("Sent room formula: %s", formula.Question)
-				} else {
-					log.Printf("No formula available for room %s", c.room.ID)
+				// プレイヤーの準備状態を設定
+				if err := c.room.SetPlayerReady(c.playerID, true); err != nil {
+					log.Printf("Failed to set player ready: %v", err)
+					continue
+				}
+
+				// 準備完了メッセージを全員に送信
+				readyMsg := map[string]interface{}{
+					"type":     "PLAYER_READY",
+					"playerID": c.playerID,
+				}
+				readyData, _ := json.Marshal(readyMsg)
+				c.hub.broadcast <- Broadcast{
+					RoomID:  c.room.ID,
+					Message: readyData,
+				}
+
+				// 全プレイヤーが準備完了したら計算式を送信
+				if c.room.AreAllPlayersReady() {
+					// 少し待ってから計算式を送信（確実に準備完了メッセージが先に送信されるように）
+					go func() {
+						time.Sleep(100 * time.Millisecond)
+
+						// ルームで計算式を生成
+						c.room.GenerateFormula()
+						formula := c.room.GetFormula()
+
+						// 計算式を全員に送信
+						formulaMsg := map[string]interface{}{
+							"type":     "FORMULA",
+							"Question": formula.Question,
+							"Answer":   formula.Answer,
+						}
+						formulaData, _ := json.Marshal(formulaMsg)
+						c.hub.broadcast <- Broadcast{
+							RoomID:  c.room.ID,
+							Message: formulaData,
+						}
+
+						// 準備状態をリセット
+						c.room.ResetPlayerReady()
+
+						log.Printf("Sent formula to all players: %s", formula.Question)
+					}()
 				}
 			default:
 				// その他のメッセージはブロードキャスト
@@ -107,20 +137,8 @@ func (c *Client) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			w.Write(message)
-
-			// バッファの残りも書き出す
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write([]byte{'\n'})
-				w.Write(<-c.send)
-			}
-
-			if err := w.Close(); err != nil {
+			// 各メッセージを個別に送信
+			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
 				return
 			}
 		case <-ticker.C:
