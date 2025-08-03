@@ -1,10 +1,10 @@
 .sub_box {
     font-family: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
-    background-color: #fffefa;
+    background-color: #1a1a1a;
     padding: 20px 25px;
     border-radius: 10px;
     line-height: 1.8;
-    color: #333;
+    color: #fff;
     font-size: 16px;
     max-width: 600px;
     margin: 0 auto;
@@ -13,7 +13,7 @@
 .sub_box h2 {
     font-size: 22px;
     margin-bottom: 15px;
-    color: #2e7d32;
+    color: #fff;
     text-align: center;
 }
 
@@ -24,7 +24,7 @@
 .rule-section h3 {
     font-size: 18px;
     font-weight: bold;
-    color: #d32f2f;
+    color: #fff;
     margin-bottom: 8px;
 }
 
@@ -34,4 +34,5 @@
 
 .rule-section li {
     margin-bottom: 6px;
+    color: #fff;
 }
