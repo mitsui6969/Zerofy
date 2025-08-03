@@ -81,17 +81,17 @@ func (c *Client) readPump() {
 					go func() {
 						time.Sleep(100 * time.Millisecond)
 
-						// ルームで計算式を生成
+						// 新しいラウンドなので必ず新しい計算式を生成
 						c.room.GenerateFormula()
 						formula := c.room.GetFormula()
 
-						                        // 計算式を全員に送信
-                        formulaMsg := map[string]interface{}{
-                            "type":     "FORMULA",
-                            "Question": formula.Question,
-                            "Answer":   formula.Answer,
-                            "Points":   formula.Points,
-                        }
+						// 計算式を全員に送信
+						formulaMsg := map[string]interface{}{
+							"type":     "FORMULA",
+							"Question": formula.Question,
+							"Answer":   formula.Answer,
+							"Points":   formula.Points,
+						}
 						formulaData, _ := json.Marshal(formulaMsg)
 						c.hub.broadcast <- Broadcast{
 							RoomID:  c.room.ID,
@@ -124,10 +124,10 @@ func (c *Client) readPump() {
 				if answer, ok := msg["Answer"].(float64); ok {
 					if time, ok := msg["Time"].(float64); ok {
 						if points, ok := msg["Points"].(float64); ok {
-							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f", 
+							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f",
 								c.playerID, answer, time, points)
 						} else {
-							log.Printf("Player %s answered: %v, Time: %.2fs", 
+							log.Printf("Player %s answered: %v, Time: %.2fs",
 								c.playerID, answer, time)
 						}
 					}
@@ -142,15 +142,15 @@ func (c *Client) readPump() {
 						log.Printf("=== 勝敗判定ログ ===")
 						log.Printf("勝者: %s", winner)
 						log.Printf("回答: %d", int(answer))
-						
+
 						// 勝者のポイントを取得してログ出力
 						if point, err := c.room.GetPlayerPoint(winner); err == nil {
 							log.Printf("勝者の更新後ポイント: %d", point)
 						}
-						
+
 						// 勝敗結果を全員に送信
 						resultMsg := map[string]interface{}{
-							"type": "RESULT",
+							"type":   "RESULT",
 							"winner": winner,
 							"answer": int(answer),
 						}
@@ -159,6 +159,9 @@ func (c *Client) readPump() {
 							RoomID:  c.room.ID,
 							Message: resultData,
 						}
+
+						// 勝敗結果送信後に準備状態をリセット（次のラウンドの準備）
+						c.room.ResetPlayerReady()
 					} else {
 						log.Printf("=== 回答処理ログ ===")
 						log.Printf("プレイヤーID: %s", c.playerID)

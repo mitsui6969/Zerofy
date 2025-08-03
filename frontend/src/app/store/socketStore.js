@@ -9,12 +9,13 @@ export const useSocketStore = create((set, get) => ({
     room: null, // 参加したルームの情報を保持
     player: null, // プレイヤー情報を保持
     points: 20, // 初期ポイント
+    setPhase: (newPhase) => set({ phase: newPhase }), // フェーズを更新する関数
     currentFormula: null, // 現在の計算式
     currentPoints: 0, // 現在の問題のポイント
     readyPlayers: new Set(), // 準備完了したプレイヤーを管理
     formula: null, // 計算式を保持
 
-    // 1. WebSocketに接続する関数
+    // 1. WbSocketに接続する関数
     connect: (initialMessage) => {
         // 既に接続済みの場合は何もしない
         if (get().socket) return;
@@ -79,7 +80,8 @@ export const useSocketStore = create((set, get) => ({
                         set({ 
                             phase: 'RESULT',
                             winner: message.winner,
-                            correctAnswer: message.answer
+                            correctAnswer: message.answer,
+                            formula: null // 次のラウンドのために計算式をクリア
                         });
                         
                         // プレイヤーストアのポイントを更新
