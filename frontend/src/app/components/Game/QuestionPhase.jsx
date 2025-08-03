@@ -3,7 +3,7 @@ import { useSocketStore } from '../../store/socketStore';
 import { usePlayerStore } from '../../features/payer/playerStore';
 
 export default function QuestionPhase() {
-    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState } = useSocketStore();
+    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState, phase } = useSocketStore();
     const { myPlayer, opponent } = usePlayerStore();
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
@@ -12,14 +12,14 @@ export default function QuestionPhase() {
     const inputRef = useRef(null);
     const startTimeRef = useRef(null);
 
-    // コンポーネントマウント時に準備状態をリセット
+    // コンポーネントマウント時とRESULTフェーズからQUESTIONフェーズに戻る際に準備状態をリセット
     useEffect(() => {
         resetReadyState();
         setIsReady(false);
         setIsStarted(false);
         setAnswer('');
         setElapsedMs(null);
-    }, []);
+    }, [phase, resetReadyState]);
 
     // スペースキーで準備完了
     useEffect(() => {
