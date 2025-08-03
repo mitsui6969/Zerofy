@@ -28,7 +28,7 @@ export default function Home() {
       type: "JOIN",
       roomID: roomID, // ランダムマッチングなので空
       playerName: playerName || `Guest-${Math.floor(Math.random() * 1000)}`,
-      friend: false,
+      friend: roomID ? true : false, // 友達と遊ぶ場合はtrue
     };
     connect(message); // 作成したメッセージを渡して接続開始
     }
