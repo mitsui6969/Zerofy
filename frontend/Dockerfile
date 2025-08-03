@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # 一度インストール（初回のみ失敗しても可）
-RUN npm install || true
+RUN npm install
 
 # アプリ本体をコピー
 COPY . .
