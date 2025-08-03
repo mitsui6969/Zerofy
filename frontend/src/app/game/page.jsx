@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import BetPhase from '@/app/components/Game/BetPhase';
 import QuestionPhase from '@/app/components/Game/QuestionPhase';
 import ResultPhase from '@/app/components/Game/ResultPhase';
+import EndPhase from '../components/Game/EndPhase';
 import { useSocketStore } from '../store/socketStore';
 import "../style/game.css"
 import Link from "next/link";
@@ -58,6 +59,7 @@ export default function GamePage() {
                     {phase === 'BET' && <BetPhase ws={ws} />}
                     {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
                     {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
+                    {phase === 'END' && <EndPhase />}
                     {phase === 'WAIT' && <p>Waiting for opponent...</p>}
                     </main>
                 )
