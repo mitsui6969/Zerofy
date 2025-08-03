@@ -298,18 +298,6 @@ export default function QuestionPhase() {
                             <p className="text-red-700 font-semibold">× {submittedAnswer}</p>
                         </div>
                     )}
-                    
-                    {/* デバッグ情報 */}
-                    <div className="mt-2 text-xs text-gray-500">
-                        <p>isIncorrect: {isIncorrect.toString()}</p>
-                        <p>submittedAnswer: {submittedAnswer}</p>
-                        <p>phase: {phase}</p>
-                        <p>countdown: {countdown}</p>
-                        <p>isStarted: {isStarted.toString()}</p>
-                        <p>formula: {formula ? '受信済み' : '未受信'}</p>
-                        <p>formula.question: {formula?.question || 'なし'}</p>
-                        <p>currentPoints: {currentPoints}</p>
-                    </div>
                 </div>
             )}
         </div>
