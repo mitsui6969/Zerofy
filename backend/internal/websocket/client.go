@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/mitsui6969/Zerofy/backend/internal/game"
 	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
 )
 
@@ -59,12 +58,21 @@ func (c *Client) readPump() {
 		if msgType, ok := msg["type"].(string); ok {
 			switch msgType {
 			case "START_GAME":
-				// ゲーム開始時に問題を生成して送信
-				formula := game.CreateFormula()
-				if err := game.SendFormula(c.conn, formula); err != nil {
-					log.Printf("Failed to send formula: %v", err)
+				// ゲーム開始時にルームで生成された式を送信
+				formula := c.room.GetFormula()
+				if formula != nil {
+					jsonData, err := json.Marshal(formula)
+					if err != nil {
+						log.Printf("Failed to marshal formula: %v", err)
+						continue
+					}
+					if err := c.conn.WriteMessage(websocket.TextMessage, jsonData); err != nil {
+						log.Printf("Failed to send formula: %v", err)
+					}
+					log.Printf("Sent room formula: %s", formula.Question)
+				} else {
+					log.Printf("No formula available for room %s", c.room.ID)
 				}
-				log.Printf("Sent formula: %s", formula.Question)
 			default:
 				// その他のメッセージはブロードキャスト
 				c.hub.broadcast <- Broadcast{

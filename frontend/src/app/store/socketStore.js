@@ -8,6 +8,7 @@ export const useSocketStore = create((set, get) => ({
     room: null, // 参加したルームの情報を保持
     player: null, // プレイヤー情報を保持
     points: 20, // 初期ポイント
+    currentFormula: null, // 現在の計算式
 
     // 1. WebSocketに接続する関数
     connect: (initialMessage) => {
@@ -39,6 +40,12 @@ export const useSocketStore = create((set, get) => ({
             // フェーズ系のメッセージならphase更新
             if (['BET', 'QUESTION', 'RESULT'].includes(message.type)) {
                 set({ phase: message.type });
+                
+                // QUESTIONメッセージの場合は式も保存
+                if (message.type === 'QUESTION' && message.formula) {
+                    set({ currentFormula: message.formula });
+                    console.log('Formula saved in store:', message.formula.Question);
+                }
             }
         };
 

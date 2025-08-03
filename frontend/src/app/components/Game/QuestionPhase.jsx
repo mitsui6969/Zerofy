@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocketStore } from '../../store/socketStore';
 
 export default function QuestionPhase() {
-    const { socket, isConnected } = useSocketStore();
+    const { socket, isConnected, currentFormula } = useSocketStore();
     const [expression, setExpression] = useState(""); // 式を保持
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
@@ -10,17 +10,20 @@ export default function QuestionPhase() {
     const inputRef = useRef(null);
     const startTimeRef = useRef(null);
 
-    // コンポーネントマウント時に問題を要求
+    // コンポーネントマウント時の処理（START_GAMEは送信しない）
     useEffect(() => {
-        if (socket) {
-            socket.send(JSON.stringify({
-                type: 'START_GAME'
-            }));
-            console.log('Requested formula on mount');
-        }
-    }, [socket]);
+        console.log('QuestionPhase mounted');
+    }, []);
 
-    // WebSocket受信処理
+    // currentFormulaが更新された時に式を設定
+    useEffect(() => {
+        if (currentFormula && currentFormula.Question) {
+            setExpression(currentFormula.Question);
+            console.log('Formula set from store:', currentFormula.Question);
+        }
+    }, [currentFormula]);
+
+    // WebSocket受信処理（フォールバック用）
     useEffect(() => {
         if (!socket) return;
         
@@ -29,15 +32,10 @@ export default function QuestionPhase() {
             try {
                 const message = JSON.parse(event.data);
                 
-                // Formulaオブジェクトが直接送信されている場合
-                if (message.Question) {
+                // フォールバック: 直接Formulaオブジェクトが送信された場合
+                if (message.Question && !message.type) {
                     setExpression(message.Question);
-                    console.log('Formula received:', message.Question);
-                }
-                // payloadの中にQuestionがある場合（既存の処理）
-                else if (message.payload && message.payload.Question) {
-                    setExpression(message.payload.Question);
-                    console.log('Formula received from payload:', message.payload.Question);
+                    console.log('Formula received directly (fallback):', message.Question);
                 }
             } catch (error) {
                 console.error('Error parsing message:', error);
