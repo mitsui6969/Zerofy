@@ -59,12 +59,49 @@ func (c *Client) readPump() {
 		if msgType, ok := msg["type"].(string); ok {
 			switch msgType {
 			case "START_GAME":
-				// ゲーム開始時に問題を生成して送信
-				formula := game.CreateFormula()
-				if err := game.SendFormula(c.conn, formula); err != nil {
-					log.Printf("Failed to send formula: %v", err)
+				// プレイヤーの準備状態を設定
+				if err := c.room.SetPlayerReady(c.playerID, true); err != nil {
+					log.Printf("Failed to set player ready: %v", err)
+					continue
 				}
-				log.Printf("Sent formula: %s", formula.Question)
+
+				// 準備完了メッセージを全員に送信
+				readyMsg := map[string]interface{}{
+					"type":     "PLAYER_READY",
+					"playerID": c.playerID,
+				}
+				readyData, _ := json.Marshal(readyMsg)
+				c.hub.broadcast <- Broadcast{
+					RoomID:  c.room.ID,
+					Message: readyData,
+				}
+
+				// 全プレイヤーが準備完了したら計算式を送信
+				if c.room.AreAllPlayersReady() {
+					// 少し待ってから計算式を送信（確実に準備完了メッセージが先に送信されるように）
+					go func() {
+						time.Sleep(100 * time.Millisecond)
+
+						formula := game.CreateFormula()
+
+						// 計算式を全員に送信
+						formulaMsg := map[string]interface{}{
+							"type":     "FORMULA",
+							"Question": formula.Question,
+							"Answer":   formula.Answer,
+						}
+						formulaData, _ := json.Marshal(formulaMsg)
+						c.hub.broadcast <- Broadcast{
+							RoomID:  c.room.ID,
+							Message: formulaData,
+						}
+
+						// 準備状態をリセット
+						c.room.ResetPlayerReady()
+
+						log.Printf("Sent formula to all players: %s", formula.Question)
+					}()
+				}
 			default:
 				// その他のメッセージはブロードキャスト
 				c.hub.broadcast <- Broadcast{
@@ -99,20 +136,8 @@ func (c *Client) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-			w.Write(message)
-
-			// バッファの残りも書き出す
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write([]byte{'\n'})
-				w.Write(<-c.send)
-			}
-
-			if err := w.Close(); err != nil {
+			// 各メッセージを個別に送信
+			if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
 				return
 			}
 		case <-ticker.C:

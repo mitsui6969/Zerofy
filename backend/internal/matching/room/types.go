@@ -54,9 +54,9 @@ type RoomManager struct {
 
 // Room情報をクライアント用に整形する構造体
 type RoomResponse struct {
-    ID      string   `json:"id"`
-    Players []string `json:"players"`
-    IsFull  bool     `json:"isFull"`
+	ID      string   `json:"id"`
+	Players []string `json:"players"`
+	IsFull  bool     `json:"isFull"`
 }
 
 var (
@@ -101,15 +101,15 @@ func NewRoomManager() *RoomManager {
 
 // Room -> RoomResponse 変換関数
 func ToRoomResponse(r *Room) RoomResponse {
-    players := []string{}
-    for _, p := range r.Players { // ここは実際のプレイヤー管理に合わせて修正
-        players = append(players, p.Name)
-    }
-    return RoomResponse{
-        ID:      r.ID,
-        Players: players,
-        IsFull:  r.IsFull(),
-    }
+	players := []string{}
+	for _, p := range r.Players { // ここは実際のプレイヤー管理に合わせて修正
+		players = append(players, p.Name)
+	}
+	return RoomResponse{
+		ID:      r.ID,
+		Players: players,
+		IsFull:  r.IsFull(),
+	}
 }
 
 func (r *Room) IsFull() bool {
@@ -165,4 +165,45 @@ func (r *Room) RemovePlayer(playerID string) error {
 
 	delete(r.Players, playerID)
 	return nil
+}
+
+// SetPlayerReady プレイヤーの準備状態を設定
+func (r *Room) SetPlayerReady(playerID string, ready bool) error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	player, exists := r.Players[playerID]
+	if !exists {
+		return ErrPlayerNotFound
+	}
+
+	player.Ready = ready
+	return nil
+}
+
+// AreAllPlayersReady 全プレイヤーが準備完了しているかチェック
+func (r *Room) AreAllPlayersReady() bool {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	if len(r.Players) == 0 {
+		return false
+	}
+
+	for _, player := range r.Players {
+		if !player.Ready {
+			return false
+		}
+	}
+	return true
+}
+
+// ResetPlayerReady 全プレイヤーの準備状態をリセット
+func (r *Room) ResetPlayerReady() {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	for _, player := range r.Players {
+		player.Ready = false
+	}
 }
