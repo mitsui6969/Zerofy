@@ -10,6 +10,7 @@ export default function QuestionPhase() {
     const [isStarted, setIsStarted] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const [submittedAnswer, setSubmittedAnswer] = useState(null);
+    const [countdown, setCountdown] = useState(null);
     const inputRef = useRef(null);
     const startTimeRef = useRef(null);
 
@@ -21,6 +22,7 @@ export default function QuestionPhase() {
         setAnswer('');
         setElapsedMs(null);
         setSubmittedAnswer(null);
+        setCountdown(null);
         
         // 新しいQUESTIONフェーズの開始時のみ不正解状態をリセット
         if (phase === 'QUESTION') {
@@ -60,13 +62,42 @@ export default function QuestionPhase() {
         };
     }, [isReady, socket]);
 
-    // 計算式が受信されたら開始
+    // 計算式が受信されたらカウントダウン開始
     useEffect(() => {
-        if (formula && !isStarted) {
-            setIsStarted(true);
-            startTimeRef.current = Date.now();
+        if (formula && !isStarted && countdown === null) {
+            console.log('カウントダウン開始');
+            setCountdown(3);
         }
-    }, [formula, isStarted]);
+    }, [formula, isStarted, countdown]);
+
+    // カウントダウン処理
+    useEffect(() => {
+        // カウントダウンが不要な場合は処理を中断
+        if (countdown === null || isStarted) return;
+    
+        let timer;
+    
+        if (typeof countdown === 'number' && countdown > 0) {
+            // カウントダウン中 (3, 2, 1)
+            timer = setTimeout(() => {
+                setCountdown(prev => (typeof prev === 'number' ? prev - 1 : prev));
+            }, 1000);
+        } else if (countdown === 0) {
+            // カウントダウンが0になったら "start" に状態を移行
+            setCountdown("start");
+        } else if (countdown === "start") {
+            // "Start!" と表示した状態で1秒待機
+            timer = setTimeout(() => {
+                console.log("Start!表示終了、計算式表示開始");
+                setIsStarted(true);
+                startTimeRef.current = Date.now();
+                setCountdown(null); // ゲーム開始と同時にカウントダウン状態をリセット
+            }, 1000); // "Start!" の表示時間
+        }
+    
+        return () => clearTimeout(timer);
+    }, [countdown, isStarted]);
+    
 
     // ゲーム開始後にキーボードイベントリスナーを追加
     useEffect(() => {
@@ -182,44 +213,77 @@ export default function QuestionPhase() {
                     <p className="text-lg mb-4">スペースキーで準備完了！</p>
                     <p className="text-sm text-gray-600">両プレイヤーが準備完了すると同時に問題が表示されます</p>
                 </div>
-            ) : !isStarted ? (
-                <div>
-                    <p className="text-lg mb-4 text-green-600">✓ 準備完了！</p>
-                    <p className="text-sm text-gray-600">
-                        相手プレイヤーの準備を待っています... ({readyPlayers.size}/2)
-                    </p>
-                </div>
             ) : (
                 <div>
-                    {formula ? (
+                    {countdown !== null ? (
+                        <div className="text-center">
+                            <div className="text-6xl font-bold text-red-600 mb-4">
+                                {countdown === 'start' ? 'Start!' : countdown}
+                            </div>
+                            <p className="text-lg text-gray-600">
+                                {countdown === 'start' ? 'ゲーム開始！' : '準備してください！'}
+                            </p>
+                        </div>
+                    ) : !isStarted ? (
+                        <div>
+                            <p className="text-lg mb-4 text-green-600">✓ 準備完了！</p>
+                            <p className="text-sm text-gray-600">
+                                相手プレイヤーの準備を待っています... ({readyPlayers.size}/2)
+                            </p>
+                        </div>
+                    ) : isStarted && formula.question ? (
                         <div>
                             <p className="text-lg mb-2">{formula.question} = ?</p>
                             <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>
                             <p className="text-sm text-gray-600 mb-2">
                                 操作: 数字キーで入力 → Enterで送信 → Deleteで1文字削除 → Escでクリア
                             </p>
+
+                            {/* 入力欄 */}
+                            <div>
+                                <input
+                                    type="text"
+                                    value={answer}
+                                    onKeyDown={handleKeyDown}
+                                    ref={inputRef}
+                                    className="border p-2 mr-2"
+                                    placeholder="キーボードで数字を入力してください"
+                                    readOnly
+                                />
+                                <button
+                                    onClick={handleSubmit}
+                                    className="bg-green-500 text-white px-4 py-2 rounded"
+                                >
+                                    解答
+                                </button>
+                            </div>
                         </div>
                     ) : (
-                        <p>問題を待機中...</p>
+                        <div>
+                            <p className="text-lg mb-2">問題を待機中...</p>
+                            <p className="text-sm text-gray-600">計算式を受信中...</p>
+                        </div>
                     )}
                     
-                    <input
-                        type="text"
-                        value={answer}
-                        onKeyDown={handleKeyDown}
-                        ref={inputRef}
-                        className="border p-2 mr-2"
-                        disabled={!isStarted}
-                        placeholder="キーボードで数字を入力してください"
-                        readOnly
-                    />
-                    <button
-                        onClick={handleSubmit}
-                        className="bg-green-500 text-white px-4 py-2 rounded"
-                        disabled={!isStarted}
-                    >
-                        解答
-                    </button>
+                    {/* {isStarted && formula && (
+                        <>
+                            <input
+                                type="text"
+                                value={answer}
+                                onKeyDown={handleKeyDown}
+                                ref={inputRef}
+                                className="border p-2 mr-2"
+                                placeholder="キーボードで数字を入力してください"
+                                readOnly
+                            />
+                            <button
+                                onClick={handleSubmit}
+                                className="bg-green-500 text-white px-4 py-2 rounded"
+                            >
+                                解答
+                            </button>
+                        </>
+                    )} */}
                     
                     {/* ここで経過時間を表示 */}
                     {elapsedMs !== null && (
@@ -240,6 +304,11 @@ export default function QuestionPhase() {
                         <p>isIncorrect: {isIncorrect.toString()}</p>
                         <p>submittedAnswer: {submittedAnswer}</p>
                         <p>phase: {phase}</p>
+                        <p>countdown: {countdown}</p>
+                        <p>isStarted: {isStarted.toString()}</p>
+                        <p>formula: {formula ? '受信済み' : '未受信'}</p>
+                        <p>formula.question: {formula?.question || 'なし'}</p>
+                        <p>currentPoints: {currentPoints}</p>
                     </div>
                 </div>
             )}
