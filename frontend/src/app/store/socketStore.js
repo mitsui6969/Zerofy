@@ -10,6 +10,8 @@ export const useSocketStore = create((set, get) => ({
     points: 20, // 初期ポイント
     currentFormula: null, // 現在の計算式
     currentPoints: 0, // 現在の問題のポイント
+    readyPlayers: new Set(), // 準備完了したプレイヤーを管理
+    formula: null, // 計算式を保持
 
     // 1. WebSocketに接続する関数
     connect: (initialMessage) => {
@@ -30,27 +32,59 @@ export const useSocketStore = create((set, get) => ({
         // メッセージ受信時の処理
         ws.onmessage = (event) => {
             console.log("✉️ Message from server: ", event.data);
-            const message = JSON.parse(event.data);
+            
+            // 複数のJSONメッセージが連続している可能性があるため、改行で分割
+            const messages = event.data.split('\n').filter(msg => msg.trim());
+            
+            messages.forEach(messageStr => {
+                try {
+                    const message = JSON.parse(messageStr);
+                    
+                    // JOIN_SUCCESS の場合は WAIT に設定
+                    if (message.type === 'JOIN_SUCCESS') {
+                        set({ room: message.room, phase: 'WAIT' });
+                        return;
+                    }
 
-             // JOIN_SUCCESS の場合は WAIT に設定
-            if (message.type === 'JOIN_SUCCESS') {
-                set({ room: message.room, phase: 'WAIT' });
-                return;
-            }
+                    // プレイヤーの準備完了メッセージ
+                    if (message.type === 'PLAYER_READY') {
+                        const { readyPlayers } = get();
+                        readyPlayers.add(message.playerID);
+                        set({ readyPlayers: new Set(readyPlayers) });
+                        console.log('Player ready:', message.playerID);
+                        return;
+                    }
 
-            // フェーズ系のメッセージならphase更新
-            if (['BET', 'QUESTION', 'RESULT'].includes(message.type)) {
-                set({ phase: message.type });
-                
-                // QUESTIONメッセージの場合は式も保存
-                if (message.type === 'QUESTION' && message.formula) {
-                    set({ 
-                        currentFormula: message.formula,
-                        currentPoints: message.formula.Points || 0
-                    });
-                    console.log('Formula saved in store:', message.formula.Question, 'Points:', message.formula.Points);
+                    // 計算式メッセージ
+                    if (message.type === 'FORMULA') {
+                        set({ 
+                            formula: {
+                                question: message.Question,
+                                answer: message.Answer
+                            },
+                            phase: 'QUESTION'
+                        });
+                        console.log('Formula received:', message.Question);
+                        return;
+                    }
+
+                    // フェーズ系のメッセージならphase更新
+                    if (['BET', 'QUESTION', 'RESULT'].includes(message.type)) {
+                        set({ phase: message.type });
+
+                        // QUESTIONメッセージの場合は式も保存
+                        if (message.type === 'QUESTION' && message.formula) {
+                            set({ 
+                                currentFormula: message.formula,
+                                currentPoints: message.formula.Points || 0
+                            });
+                            console.log('Formula saved in store:', message.formula.Question, 'Points:', message.formula.Points);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing message:', error, 'Raw message:', messageStr);
                 }
-            }
+            });
         };
 
         ws.onclose = () => {
@@ -86,5 +120,10 @@ export const useSocketStore = create((set, get) => ({
             socket.close();
         }
         set({ socket: null, isConnected: false, room: null });
+    },
+
+    // 4. 準備状態をリセットする関数
+    resetReadyState: () => {
+        set({ readyPlayers: new Set() });
     },
 }));
