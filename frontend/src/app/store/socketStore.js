@@ -4,7 +4,10 @@ export const useSocketStore = create((set, get) => ({
     ws: null, // WebSocketのインスタンスを保持
     socket: null,
     isConnected: false,
+    phase: 'WAIT', // フェーズ管理
     room: null, // 参加したルームの情報を保持
+    player: null, // プレイヤー情報を保持
+    points: 20, // 初期ポイント
 
     // 1. WebSocketに接続する関数
     connect: (initialMessage) => {
@@ -20,7 +23,7 @@ export const useSocketStore = create((set, get) => ({
             if (initialMessage) {
                 get().sendMessage(initialMessage); // ←引数を送信
             }
-            get().sendMessage("フロントから接続しました");
+            // get().sendMessage("フロントから接続しました");
         };
 
         // メッセージ受信時の処理
@@ -28,11 +31,16 @@ export const useSocketStore = create((set, get) => ({
             console.log("✉️ Message from server: ", event.data);
             const message = JSON.parse(event.data);
 
-            // サーバーからJOIN成功の応答を受け取ったら、room情報を更新
+             // JOIN_SUCCESS の場合は WAIT に設定
             if (message.type === 'JOIN_SUCCESS') {
-                set({ room: message.room });
+                set({ room: message.room, phase: 'WAIT' });
+                return;
             }
-            // 他のメッセージタイプに応じた処理...
+
+            // フェーズ系のメッセージならphase更新
+            if (['BET', 'QUESTION', 'RESULT'].includes(message.type)) {
+                set({ phase: message.type });
+            }
         };
 
         ws.onclose = () => {
