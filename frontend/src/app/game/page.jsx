@@ -14,6 +14,12 @@ export default function GamePage() {
     const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
     const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
 
+    const handlePlayAgain = () => {
+        // 次のラウンドを開始する処理
+        // ここでサーバーに次のラウンド開始を要求する
+        console.log('Play again clicked');
+    };
+
     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
     const [showMatched, setShowMatched] = useState(false);
@@ -40,13 +46,13 @@ export default function GamePage() {
         <>
             {displayPhase === 'WAIT'? (
                 <div className="matching">
-                    <div className="circle circle-top-right"></div>
-                    <div className="circle circle-bottom-left"></div>
+                    <div className={`circle circle-top-right ${showMatched ? "merge" : ""}`}></div>
+                    <div className={`circle circle-bottom-left ${showMatched ? "merge" : ""}`}></div>
 
-                    <h1>
+                    <h1 className={showMatched ? "match-text show" : "matching-"}>
                         {showMatched ? "マッチングしました！" : "相手を探しています..."}
                     </h1>
-
+                    
                     {!showMatched && (
                         <div className='cancel'>
                             <Link href='/'>
@@ -60,6 +66,7 @@ export default function GamePage() {
                     {phase === 'BET' && <BetPhase ws={socket} />}
                     {phase === 'QUESTION' && <QuestionPhase data={data} ws={socket} />}
                     {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
+
                     {phase === 'END' && <EndPhase />}
                     {phase === 'WAIT' && <p>Waiting for opponent...</p>}
                     </main>
