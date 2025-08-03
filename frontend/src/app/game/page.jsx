@@ -90,10 +90,8 @@ export default function GamePage() {
                     
                     {!showMatched && (
                         <div className='cancel'>
-                            <Link href='/' passHref legacyBehavior>
-                                <a onClick={playSound}>
-                                    <button>キャンセル</button>
-                                </a>
+                            <Link href='/' onClick={playSound}>
+                                <button>キャンセル</button>
                             </Link>
                         </div>
                     )}
