@@ -8,14 +8,21 @@ import "../style/game.css"
 import Link from "next/link";
 
 export default function GamePage() {
-    const [phase, setPhase] = useState('WAIT'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
+    const [phase, setPhase] = useState('QUESTION'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
     const [data, setData] = useState(null); // サーバーからのフェーズデータ
-    const [ws, setWs] = useState(null);
-    // const {messages, setMessages} = useSocketStore();
+    const { socket, isConnected, connect } = useSocketStore();
 
     useEffect(() => {
-
-    }, []);
+        // WebSocket接続を確立
+        if (!socket && !isConnected) {
+            connect({
+                type: 'JOIN',
+                roomID: '',
+                playerName: 'Player',
+                friend: false
+            });
+        }
+    }, [socket, isConnected, connect]);
 
     return (
     <div>
@@ -33,8 +40,8 @@ export default function GamePage() {
         </div>
         ) : (
         <main className="p-8">
-        {phase === 'BET' && <BetPhase ws={ws} />}
-        {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
+        {phase === 'BET' && <BetPhase />}
+        {phase === 'QUESTION' && <QuestionPhase />}
         {phase === 'RESULT' && <ResultPhase data={data} />}
         </main> 
     )}

@@ -1,10 +1,12 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/mitsui6969/Zerofy/backend/internal/game"
 	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
 )
 
@@ -44,11 +46,38 @@ func (c *Client) readPump() {
 			break
 		}
 
-		log.Printf("[WS] 受け取ったよ roomID: %s, playerID: %s\n", string(c.room.ID), string(c.playerID)) // 受け取りログ
+		log.Printf("[WS] 受け取ったよ roomID: %s, playerID: %s\n", string(c.room.ID), string(c.playerID))
 
-		c.hub.broadcast <- Broadcast{
-			RoomID:  c.room.ID,
-			Message: message,
+		// メッセージを解析
+		var msg map[string]interface{}
+		if err := json.Unmarshal(message, &msg); err != nil {
+			log.Printf("JSON parse error: %v", err)
+			continue
+		}
+
+		// メッセージタイプに応じた処理
+		if msgType, ok := msg["type"].(string); ok {
+			switch msgType {
+			case "START_GAME":
+				// ゲーム開始時に問題を生成して送信
+				formula := game.CreateFormula()
+				if err := game.SendFormula(c.conn, formula); err != nil {
+					log.Printf("Failed to send formula: %v", err)
+				}
+				log.Printf("Sent formula: %s", formula.Question)
+			default:
+				// その他のメッセージはブロードキャスト
+				c.hub.broadcast <- Broadcast{
+					RoomID:  c.room.ID,
+					Message: message,
+				}
+			}
+		} else {
+			// タイプがない場合はブロードキャスト
+			c.hub.broadcast <- Broadcast{
+				RoomID:  c.room.ID,
+				Message: message,
+			}
 		}
 	}
 }
