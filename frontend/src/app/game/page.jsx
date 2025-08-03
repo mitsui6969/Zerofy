@@ -22,25 +22,28 @@ export default function GamePage() {
     }, []);
 
     return (
-    <div>
-        {phase === 'WAIT'? (
-        <div className="matching">
-            <div className="circle circle-top-right"></div>
-            <div className="circle circle-bottom-left"></div>
+        <>
+            {phase === 'WAIT'? (
+                <div className="matching">
+                    <div className="circle circle-top-right"></div>
+                    <div className="circle circle-bottom-left"></div>
 
-            <h1>相手を探しています...</h1>
-        <div className='cancel'>
-            <Link href='/'>
-                <button>キャンセル</button>
-            </Link>
-        </div>
-        </div>
-        ) : (
-        <main className="p-8">
-        {phase === 'BET' && <BetPhase ws={ws} />}
-        {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
-        {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
-        {phase === 'WAIT' && <p>Waiting for opponent...</p>}
-        </main>
-    );
+                    <h1>相手を探しています...</h1>
+                <div className='cancel'>
+                    <Link href='/'>
+                        <button>キャンセル</button>
+                    </Link>
+                </div>
+                </div>
+                ) : (
+                    <main className="p-8">
+                    {phase === 'BET' && <BetPhase ws={ws} />}
+                    {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
+                    {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
+                    {phase === 'WAIT' && <p>Waiting for opponent...</p>}
+                    </main>
+                )
+            }
+        </>
+    )
 }
