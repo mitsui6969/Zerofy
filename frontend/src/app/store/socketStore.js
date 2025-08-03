@@ -45,6 +45,15 @@ export const useSocketStore = create((set, get) => ({
                     // JOIN_SUCCESS の場合は WAIT に設定
                     if (message.type === 'JOIN_SUCCESS') {
                         set({ room: message.room, phase: 'WAIT' });
+                        
+                        // プレイヤーストアを初期化
+                        const playerStore = usePlayerStore.getState();
+                        if (message.room && message.room.players) {
+                            const myId = message.room.players[0]; // 最初のプレイヤーが自分
+                            const opponentId = message.room.players[1] || null; // 2番目のプレイヤーが相手
+                            playerStore.initPlayers(myId, opponentId);
+                            console.log('プレイヤーストアを初期化しました:', { myId, opponentId });
+                        }
                         return;
                     }
 
@@ -54,6 +63,19 @@ export const useSocketStore = create((set, get) => ({
                         readyPlayers.add(message.playerID);
                         set({ readyPlayers: new Set(readyPlayers) });
                         console.log('Player ready:', message.playerID);
+                        return;
+                    }
+
+                    // ベットメッセージ
+                    if (message.type === 'Bet') {
+                        const playerStore = usePlayerStore.getState();
+                        if (message.Bet && message.playerID) {
+                            // 相手のベット情報を保存
+                            if (message.playerID !== playerStore.myPlayer.id) {
+                                playerStore.setOpponentBet(message.Bet);
+                                console.log('相手のベット情報を保存しました:', message.Bet);
+                            }
+                        }
                         return;
                     }
 
@@ -86,13 +108,20 @@ export const useSocketStore = create((set, get) => ({
                         
                         // プレイヤーストアのポイントを更新
                         const playerStore = usePlayerStore.getState();
-                        playerStore.processResult(message.winner, playerStore.myPlayer.bet, playerStore.opponent.bet);
-                        
-                        // 更新後のポイントをログ出力
-                        const updatedState = usePlayerStore.getState();
-                        console.log('=== 勝敗結果受信ログ ===');
-                        console.log('更新後の自分のポイント:', updatedState.myPlayer.point);
-                        console.log('更新後の相手のポイント:', updatedState.opponent.point);
+                        if (playerStore.myPlayer.bet !== null && playerStore.opponent.bet !== null) {
+                            playerStore.processResult(message.winner, playerStore.myPlayer.bet, playerStore.opponent.bet);
+                            
+                            // 更新後のポイントをログ出力
+                            const updatedState = usePlayerStore.getState();
+                            console.log('=== 勝敗結果受信ログ ===');
+                            console.log('更新後の自分のポイント:', updatedState.myPlayer.point);
+                            console.log('更新後の相手のポイント:', updatedState.opponent.point);
+                        } else {
+                            console.log('=== 勝敗結果受信ログ ===');
+                            console.log('ベット情報が不完全なため、ポイント更新をスキップします');
+                            console.log('自分のベット:', playerStore.myPlayer.bet);
+                            console.log('相手のベット:', playerStore.opponent.bet);
+                        }
                         
                         return;
                     }
@@ -108,6 +137,17 @@ export const useSocketStore = create((set, get) => ({
                                 currentPoints: message.formula.Points || 0
                             });
                             console.log('Formula saved in store:', message.formula.Question, 'Points:', message.formula.Points);
+                            
+                            // プレイヤーストアの相手IDを更新（2人目のプレイヤーが参加した場合）
+                            if (message.room && message.room.players && message.room.players.length >= 2) {
+                                const playerStore = usePlayerStore.getState();
+                                const myId = message.room.players[0];
+                                const opponentId = message.room.players[1];
+                                if (playerStore.myPlayer.id !== myId || playerStore.opponent.id !== opponentId) {
+                                    playerStore.initPlayers(myId, opponentId);
+                                    console.log('プレイヤーストアを更新しました:', { myId, opponentId });
+                                }
+                            }
                         }
                     }
                 } catch (error) {
