@@ -80,7 +80,8 @@ export const useSocketStore = create((set, get) => ({
                         set({ 
                             phase: 'RESULT',
                             winner: message.winner,
-                            correctAnswer: message.answer
+                            correctAnswer: message.answer,
+                            formula: null // 次のラウンドのために計算式をクリア
                         });
                         
                         // プレイヤーストアのポイントを更新

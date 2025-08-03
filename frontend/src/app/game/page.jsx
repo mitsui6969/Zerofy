@@ -31,7 +31,10 @@ export default function GamePage() {
             // RESULTになったら、5秒後にフェーズをQUESTIONに設定する
             setDisplayPhase('RESULT');
             const timer = setTimeout(() => {
-            setPhase('QUESTION');
+                setPhase('QUESTION');
+                // 新しいラウンドの準備のため、準備状態をリセット
+                const socketStore = useSocketStore.getState();
+                socketStore.resetReadyState();
             }, 5000); // 5秒
             return () => clearTimeout(timer);
         } else if (phase === 'BET') {
@@ -60,7 +63,7 @@ export default function GamePage() {
             // それ以外はそのまま同期
             setDisplayPhase(phase);
         }
-    }, [phase]);
+    }, [phase, setPhase]);
 
     return (
         <>
