@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { usePlayerStore } from '../features/payer/playerStore';
-
 export const useSocketStore = create((set, get) => ({
     ws: null, // WebSocketのインスタンスを保持
     socket: null,
@@ -29,6 +28,7 @@ export const useSocketStore = create((set, get) => ({
                 get().sendMessage(initialMessage);
             }
         };
+        
 
         // メッセージ受信時の処理
         ws.onmessage = (event) => {
@@ -44,6 +44,20 @@ export const useSocketStore = create((set, get) => ({
                     // JOIN_SUCCESS の場合は WAIT に設定
                     if (message.type === 'JOIN_SUCCESS') {
                         set({ room: message.room, phase: 'WAIT' });
+                        console.log('=== JOIN_SUCCESS ログ ===');
+                        console.log('myPlayerID:', message.playerID);
+                        return;
+                    }
+                    if (message.type === 'MATCHING_COMPLETE') {
+                        set({ room: message.room, phase: 'WAIT' });
+
+                        const playerStore = usePlayerStore.getState();
+                        playerStore.initPlayers(message.myID, message.opponentID);
+
+                        console.log('=== マッチング完了 ===')
+                        console.log('myID:', message.myID);
+                        console.log('opponentID:', message.opponentID);
+
                         return;
                     }
 
@@ -63,35 +77,9 @@ export const useSocketStore = create((set, get) => ({
                                 question: message.Question,
                                 answer: message.Answer
                             },
-                            currentPoints: message.Points || 0,
                             phase: 'QUESTION'
                         });
-                        
-                        // ポイント関係のログ出力
-                        console.log('=== 計算式受信ログ ===');
-                        console.log('問題のポイント:', message.Points);
-                        
-                        return;
-                    }
-
-                    // 勝敗結果メッセージ
-                    if (message.type === 'RESULT') {
-                        set({ 
-                            phase: 'RESULT',
-                            winner: message.winner,
-                            correctAnswer: message.answer
-                        });
-                        
-                        // プレイヤーストアのポイントを更新
-                        const playerStore = usePlayerStore.getState();
-                        playerStore.processResult(message.winner, playerStore.myPlayer.bet, playerStore.opponent.bet);
-                        
-                        // 更新後のポイントをログ出力
-                        const updatedState = usePlayerStore.getState();
-                        console.log('=== 勝敗結果受信ログ ===');
-                        console.log('更新後の自分のポイント:', updatedState.myPlayer.point);
-                        console.log('更新後の相手のポイント:', updatedState.opponent.point);
-                        
+                        console.log('Formula received:', message.Question);
                         return;
                     }
 
@@ -103,9 +91,29 @@ export const useSocketStore = create((set, get) => ({
                         if (message.type === 'QUESTION' && message.formula) {
                             set({ 
                                 currentFormula: message.formula,
-                                currentPoints: message.formula.Points || 0
+                                currentPoints: message.formula.Point || 0
                             });
-                            console.log('Formula saved in store:', message.formula.Question, 'Points:', message.formula.Points);
+
+
+                        }
+
+                        if (message.type === 'RESULT') {
+                            console.log('=== RESULTメッセージ受信 ===');
+                            console.log('message.winner:', message.winner);
+                            console.log('message.answer:', message.answer);
+
+                            set({
+                                winner: message.winner,
+                                correctAnswer: message.answer,
+                            })
+                            const currentPoints = get().currentPoints;
+                            console.log('=== RESULT処理時のポイント確認 ===');
+                            console.log('currentPoints:', currentPoints);
+                            console.log('message.formula:', message.formula);
+                            console.log('message.formula.Point:', message.formula?.Point);
+
+                            const playerStore = usePlayerStore.getState();
+                            playerStore.processResult(message.winner, currentPoints, currentPoints);
                         }
                     }
                 } catch (error) {

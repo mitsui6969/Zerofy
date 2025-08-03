@@ -40,7 +40,7 @@ func GenerateRoomID(friend bool) string {
 }
 
 // JoinOrCreateRoom ルームID指定なしなら自動割り当て
-func (rm *RoomManager) JoinOrCreateRoom(roomID, playerID, playerName string, friend bool) (*Room, error) {
+func (rm *RoomManager) JoinOrCreateRoom(roomID, playerName string, friend bool) (*Room, string, error) {
 	rm.mutex.Lock()
     defer rm.mutex.Unlock()
 
@@ -54,20 +54,22 @@ func (rm *RoomManager) JoinOrCreateRoom(roomID, playerID, playerName string, fri
         }
 
         // 既存 or 新規ルームに参加
+		playerID := room.GeneratePlayerID()
         player := NewPlayer(playerID, playerName)
         if err := room.AddPlayer(player); err != nil {
-            return nil, err
+            return nil, "", err
         }
-        return room, nil
+        return room, playerID, nil
     }
 
 	// 空きルームを探す（ランダムマッチのみ）
 	if !friend {
 		for _, r := range rm.rooms {
 			if r.IsActive && !r.IsFull() && r.GetPlayerCount() == 1 {
+				playerID := r.GeneratePlayerID()
 				player := NewPlayer(playerID, playerName)
 				if err := r.AddPlayer(player); err == nil {
-					return r, nil
+					return r,playerID, nil
 				}
 			}
 		}
@@ -78,12 +80,13 @@ func (rm *RoomManager) JoinOrCreateRoom(roomID, playerID, playerName string, fri
     r := NewRoom(newRoomID, fmt.Sprintf("Room-%s", newRoomID))
     rm.rooms[newRoomID] = r
 
+	playerID := r.GeneratePlayerID()
     player := NewPlayer(playerID, playerName)
     if err := r.AddPlayer(player); err != nil {
-        return nil, err
+        return nil, "", err
     }
 
-    return r, nil
+    return r, playerID, nil
 }
 
 // JoinRoom プレイヤーをルームに参加させる

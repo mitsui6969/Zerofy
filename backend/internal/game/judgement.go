@@ -1,21 +1,24 @@
 package game
 
-import "sync"
+import (
+	"sync"
+	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
+)
 
 // 使う変数を構造体にする
-type gameState struct {
-	winner        string
+type GameState struct {
+	WinnerID        string
 	mu            sync.Mutex
-	currentAnswer int
+	currentAnswer float64
 }
 
 // 戻り値を構造体にする
 type JudgementResult struct {
-	winnerID string
+	WinnerID string
 }
 
 // 正解の変数をCorrectAnswerにしています
-func (g *gameState) Judgement(ID string, answer int, CorrectAnswer int, players []string) (JudgementResult, error) {
+func (g *GameState) Judgement(ID string, answer float64, currentFormula *room.Formula, players []string) (JudgementResult, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 
@@ -24,25 +27,13 @@ func (g *gameState) Judgement(ID string, answer int, CorrectAnswer int, players 
 		return JudgementResult{}, ErrInvalidParameter
 	}
 
-	// 未登録プレイヤーの場合
-	found := false
-	for _, p := range players {
-		if p == ID {
-			found = true
-			break
-		}
+	if g.currentAnswer != float64(currentFormula.Answer) {
+		g.currentAnswer = float64(currentFormula.Answer)
+		g.WinnerID = ""
 	}
-	if !found {
-		return JudgementResult{}, ErrInvalidParameter
+	if g.WinnerID == "" && answer == float64(currentFormula.Answer) {
+		g.WinnerID = ID
 	}
 
-	if g.currentAnswer != CorrectAnswer {
-		g.currentAnswer = CorrectAnswer
-		g.winner = ""
-	}
-	if g.winner == "" && answer == CorrectAnswer {
-		g.winner = ID
-	}
-
-	return JudgementResult{winnerID: g.winner}, nil
+	return JudgementResult{WinnerID: g.WinnerID}, nil
 }

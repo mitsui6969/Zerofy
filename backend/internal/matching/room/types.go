@@ -15,7 +15,6 @@ type Player struct {
 	JoinedAt time.Time
 	Ready    bool
 	Point    int // プレイヤーのポイント
-	Bet      int // プレイヤーのベット額
 }
 
 type RoundResult struct {
@@ -26,8 +25,8 @@ type RoundResult struct {
 // Formula 計算式の構造体
 type Formula struct {
 	Question string
-	Answer   int
-	Points   int // 演算子ごとのポイント
+	Answer   float64
+	Point   int // 演算子ごとのポイント
 }
 
 type Room struct {
@@ -94,7 +93,6 @@ func NewPlayer(id, name string) *Player {
 		JoinedAt: time.Now(),
 		Ready:    false,
 		Point:    20, // 初期ポイント
-		Bet:      0,  // 初期ベット額
 	}
 }
 
@@ -249,20 +247,6 @@ func (r *Room) HasFormula() bool {
 	return r.CurrentFormula != nil
 }
 
-// SetPlayerBet プレイヤーのベット額を設定
-func (r *Room) SetPlayerBet(playerID string, bet int) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
-
-	player, exists := r.Players[playerID]
-	if !exists {
-		return ErrPlayerNotFound
-	}
-
-	player.Bet = bet
-	return nil
-}
-
 // GetPlayerPoint プレイヤーのポイントを取得
 func (r *Room) GetPlayerPoint(playerID string) (int, error) {
 	r.mutex.RLock()
@@ -276,43 +260,7 @@ func (r *Room) GetPlayerPoint(playerID string) (int, error) {
 	return player.Point, nil
 }
 
-// ProcessAnswer 回答を処理して勝敗判定とポイント処理を行う
-func (r *Room) ProcessAnswer(playerID string, answer int) (string, error) {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
 
-	// プレイヤーが存在するかチェック
-	player, exists := r.Players[playerID]
-	if !exists {
-		return "", ErrPlayerNotFound
-	}
-
-	// 式が存在するかチェック
-	if r.CurrentFormula == nil {
-		return "", errors.New("no formula available")
-	}
-
-	// 既に勝者が決まっている場合は何もしない
-	if r.winner != "" {
-		return "", nil
-	}
-
-	// 正解かどうかチェック
-	if answer != r.CurrentFormula.Answer {
-		return "", nil // 不正解の場合は勝者なし
-	}
-
-	// 正解の場合、そのプレイヤーが勝者（最初に正解したプレイヤー）
-	r.winner = playerID
-
-	// ポイント処理：勝ったプレイヤーのポイントを減らす
-	player.Point -= player.Bet
-	if player.Point < 0 {
-		player.Point = 0
-	}
-
-	return r.winner, nil
-}
 
 // GetPlayerList プレイヤーIDのリストを取得
 func (r *Room) GetPlayerList() []string {
@@ -373,10 +321,14 @@ func (r *Room) createFormula() Formula {
 		Answer = randomNumber1 / randomNumber2
 		Points = 5 // ÷演算子は5ポイント
 	}
-
 	return Formula{
 		Question: Question,
-		Answer:   Answer,
-		Points:   Points,
+		Answer:   float64(Answer),
+		Point:   Points,
 	}
+}
+
+func (r *Room) GeneratePlayerID() string {
+	playerCount := len(r.Players)
+	return fmt.Sprintf("%d", playerCount + 1)
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
+	"github.com/mitsui6969/Zerofy/backend/internal/game"
 )
 
 const (
@@ -22,6 +23,7 @@ type Client struct {
 	send     chan []byte
 	room     *room.Room
 	playerID string
+	gameState *game.GameState
 }
 
 func (c *Client) readPump() {
@@ -90,7 +92,7 @@ func (c *Client) readPump() {
                             "type":     "FORMULA",
                             "Question": formula.Question,
                             "Answer":   formula.Answer,
-                            "Points":   formula.Points,
+                            "Pointa":   formula.Point,
                         }
 						formulaData, _ := json.Marshal(formulaMsg)
 						c.hub.broadcast <- Broadcast{
@@ -105,20 +107,7 @@ func (c *Client) readPump() {
 					}()
 				}
 			case "Bet":
-				// ベットメッセージの処理
-				if bet, ok := msg["Bet"].(float64); ok {
-					err := c.room.SetPlayerBet(c.playerID, int(bet))
-					if err != nil {
-						log.Printf("Error setting bet: %v", err)
-					} else {
-						log.Printf("Player %s bet: %d", c.playerID, int(bet))
-					}
-				}
-				// ベットメッセージもブロードキャスト
-				c.hub.broadcast <- Broadcast{
-					RoomID:  c.room.ID,
-					Message: message,
-				}
+
 			case "Answer":
 				// 回答メッセージの処理
 				if answer, ok := msg["Answer"].(float64); ok {
@@ -135,24 +124,25 @@ func (c *Client) readPump() {
 
 				// 勝敗判定とポイント処理
 				if answer, ok := msg["Answer"].(float64); ok {
-					winner, err := c.room.ProcessAnswer(c.playerID, int(answer))
+					gameState := &game.GameState{}
+					result, err := gameState.Judgement(c.playerID, float64(answer), c.room.GetFormula(), c.room.GetPlayerList())
 					if err != nil {
 						log.Printf("Error processing answer: %v", err)
-					} else if winner != "" {
+					} else if result.WinnerID != "" {
 						log.Printf("=== 勝敗判定ログ ===")
-						log.Printf("勝者: %s", winner)
-						log.Printf("回答: %d", int(answer))
+						log.Printf("勝者: %s", result.WinnerID)
+						log.Printf("回答: %d", float64(answer))
 						
 						// 勝者のポイントを取得してログ出力
-						if point, err := c.room.GetPlayerPoint(winner); err == nil {
+						if point, err := c.room.GetPlayerPoint(result.WinnerID); err == nil {
 							log.Printf("勝者の更新後ポイント: %d", point)
 						}
 						
 						// 勝敗結果を全員に送信
 						resultMsg := map[string]interface{}{
 							"type": "RESULT",
-							"winner": winner,
-							"answer": int(answer),
+							"winner": result.WinnerID,
+							"answer": float64(answer),
 						}
 						resultData, _ := json.Marshal(resultMsg)
 						c.hub.broadcast <- Broadcast{
@@ -162,7 +152,7 @@ func (c *Client) readPump() {
 					} else {
 						log.Printf("=== 回答処理ログ ===")
 						log.Printf("プレイヤーID: %s", c.playerID)
-						log.Printf("回答: %d (不正解または既に勝者決定済み)", int(answer))
+						log.Printf("回答: %d (不正解または既に勝者決定済み)", float64(answer))
 					}
 				}
 

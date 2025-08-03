@@ -6,6 +6,14 @@ import '../../style/result.css';
 export default function ResultPhase({ onPlayAgain }) {
     const { winner, correctAnswer } = useSocketStore();
     const { myPlayer, opponent } = usePlayerStore();
+    // デバッグログを追加
+    console.log('=== ResultPhase デバッグ ===');
+    console.log('winner:', winner);
+    console.log('myPlayer.id:', myPlayer.id);
+    console.log('opponent.id:', opponent.id);
+    console.log('myPlayer.point:', myPlayer.point);
+    console.log('opponent.point:', opponent.point);
+    
     return (
         <div>
         <h2 className="title">Game Results</h2>

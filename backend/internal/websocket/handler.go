@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/mitsui6969/Zerofy/backend/internal/matching/player"
 	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
 )
 
@@ -53,7 +52,6 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	playerID := player.GeneratePlayerID()
 
 	// ルームID判定
 	isFriend := false
@@ -65,6 +63,13 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 				singleRoom = r
 				break
 			}
+			if err != nil {
+				log.Println("Join room error:", err)
+				conn.WriteMessage(websocket.TextMessage, []byte(`{"error":"join_failed"}`))
+				conn.Close()
+				return
+			}
+
 		}
 
 		if singleRoom != nil {
@@ -79,7 +84,7 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	}
 
 
-	joinedRoom, err := rm.JoinOrCreateRoom(joinMsg.RoomID, playerID, joinMsg.PlayerName, isFriend)
+	joinedRoom, playerID, err := rm.JoinOrCreateRoom(joinMsg.RoomID, joinMsg.PlayerName, isFriend)
 	if err != nil {
 		log.Println("Join room error:", err)
 		conn.WriteMessage(websocket.TextMessage, []byte(`{"error":"join_failed"}`))
@@ -94,6 +99,9 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
         "type": "JOIN_SUCCESS",
         "room": room.ToRoomResponse(joinedRoom), // ルーム情報を返す
     }
+
+
+
     res, _ := json.Marshal(joinSuccessMsg)
     conn.WriteMessage(websocket.TextMessage, res)
 
@@ -107,7 +115,27 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	}
 
 	client.hub.register <- client
+	if joinedRoom.IsFull() {
+		var opponentID string
+		for pid := range joinedRoom.Players {
+			if pid != playerID {
+				opponentID = pid
+				break
+			}
+		}
 
+		matchingMsg := map[string]interface{}{
+			"type": "MATCHING_COMPLETE",
+			"myID": playerID,
+			"opponentID": opponentID,
+			"room": room.ToRoomResponse(joinedRoom),
+		}
+		matchingData, _ := json.Marshal(matchingMsg)
+		hub.broadcast <- Broadcast{
+			RoomID: joinedRoom.ID,
+			Message: matchingData,
+		}
+	}
 	// ★2人そろったらゲーム開始通知を全員に送信
 	if joinedRoom.IsFull() {
 		// 式がまだ生成されていない場合のみ生成
