@@ -68,16 +68,24 @@ export default function QuestionPhase() {
         }
     }, [formula, isStarted]);
 
-    // 準備完了後またはゲーム開始後に自動的に入力フィールドにフォーカス
+    // ゲーム開始後にキーボードイベントリスナーを追加
     useEffect(() => {
-        if ((isReady || isStarted) && inputRef.current) {
-            // 少し遅延を入れてフォーカスを設定
-            const timer = setTimeout(() => {
-                inputRef.current.focus();
-            }, 100);
-            return () => clearTimeout(timer);
+        if (isStarted) {
+            const handleGlobalKeyDown = (e) => {
+                // 入力欄にフォーカスがある場合は無視（重複を避ける）
+                if (e.target === inputRef.current) {
+                    return;
+                }
+                handleKeyDown(e);
+            };
+
+            document.addEventListener('keydown', handleGlobalKeyDown);
+            
+            return () => {
+                document.removeEventListener('keydown', handleGlobalKeyDown);
+            };
         }
-    }, [isReady, isStarted]);
+    }, [isStarted, answer]); // answerを依存配列に追加
 
     const handleSubmit = () => {
         const endTime = Date.now();
@@ -115,6 +123,39 @@ export default function QuestionPhase() {
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
             handleSubmit();
+        } else if (e.key === 'Backspace' || e.key === 'Delete') {
+            // デリートで1文字取り消し
+            setAnswer(prev => prev.slice(0, -1));
+        } else if (e.key === 'Escape') {
+            // エスケープで入力欄をクリア
+            setAnswer('');
+        } else if (e.key === ' ') {
+            // スペースキーは準備完了用なので無視
+            return;
+        } else {
+            // 数字、マイナス、小数点の入力処理
+            const key = e.key;
+            const convertedKey = convertToHalfWidth(key);
+            
+            // 有効な文字かチェック
+            if (convertedKey.match(/^[0-9.-]$/)) {
+                // マイナス記号は先頭のみ許可
+                if (convertedKey === '-') {
+                    if (answer === '' || answer === '-') {
+                        setAnswer('-');
+                    }
+                }
+                // 小数点は1つまで許可
+                else if (convertedKey === '.') {
+                    if (!answer.includes('.')) {
+                        setAnswer(prev => prev + '.');
+                    }
+                }
+                // 数字は常に許可
+                else {
+                    setAnswer(prev => prev + convertedKey);
+                }
+            }
         }
     };
 
@@ -154,6 +195,9 @@ export default function QuestionPhase() {
                         <div>
                             <p className="text-lg mb-2">{formula.question} = ?</p>
                             <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>
+                            <p className="text-sm text-gray-600 mb-2">
+                                操作: 数字キーで入力 → Enterで送信 → Deleteで1文字削除 → Escでクリア
+                            </p>
                         </div>
                     ) : (
                         <p>問題を待機中...</p>
@@ -162,20 +206,12 @@ export default function QuestionPhase() {
                     <input
                         type="text"
                         value={answer}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            // 半角数字に変換
-                            const convertedValue = convertToHalfWidth(value);
-                            // 数字、マイナス記号、小数点のみ許可（ハイフンは先頭のみ）
-                            if (convertedValue.match(/^-?[0-9.]*$/) || convertedValue === '-') {
-                                setAnswer(convertedValue);
-                            }
-                        }}
                         onKeyDown={handleKeyDown}
                         ref={inputRef}
                         className="border p-2 mr-2"
                         disabled={!isStarted}
-                        placeholder="数字を入力してください"
+                        placeholder="キーボードで数字を入力してください"
+                        readOnly
                     />
                     <button
                         onClick={handleSubmit}
