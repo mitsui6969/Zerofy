@@ -81,7 +81,9 @@ func (c *Client) readPump() {
 					go func() {
 						time.Sleep(100 * time.Millisecond)
 
-						formula := game.CreateFormula()
+						// ルームで計算式を生成
+						c.room.GenerateFormula()
+						formula := c.room.GetFormula()
 
 						// 計算式を全員に送信
 						formulaMsg := map[string]interface{}{
