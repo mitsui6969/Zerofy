@@ -13,6 +13,10 @@ export default function GamePage() {
     const [ws, setWs] = useState(null);
     // const {messages, setMessages} = useSocketStore();
 
+    const handlePlayAgain = () => {
+        setPhase('BET');
+    };
+
     useEffect(() => {
 
     }, []);
@@ -35,9 +39,8 @@ export default function GamePage() {
         <main className="p-8">
         {phase === 'BET' && <BetPhase ws={ws} />}
         {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
-        {phase === 'RESULT' && <ResultPhase data={data} />}
-        </main> 
-    )}
-</div>
-);
+        {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
+        {phase === 'WAIT' && <p>Waiting for opponent...</p>}
+        </main>
+    );
 }
