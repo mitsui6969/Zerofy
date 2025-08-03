@@ -2,6 +2,9 @@ package room
 
 import (
 	"errors"
+	"fmt"
+	"log"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -18,6 +21,12 @@ type RoundResult struct {
 	P2 map[string]int
 }
 
+// Formula 計算式の構造体
+type Formula struct {
+	Question string
+	Answer   int
+}
+
 type Room struct {
 	ID         string
 	Name       string
@@ -29,6 +38,7 @@ type Room struct {
 	mutex      sync.RWMutex
 
 	roundResults []RoundResult
+	CurrentFormula *Formula // 現在のラウンドの式
 }
 
 func (r *Room) AddRoundResults(P1id string, P1po int, P2id string, P2po int) {
@@ -205,5 +215,69 @@ func (r *Room) ResetPlayerReady() {
 
 	for _, player := range r.Players {
 		player.Ready = false
+
+    
+// GenerateFormula ルーム用の式を生成する
+func (r *Room) GenerateFormula() {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	formula := r.createFormula()
+	r.CurrentFormula = &formula
+	log.Printf("Room %s: Generated formula: %s = %d", r.ID, formula.Question, formula.Answer)
+}
+
+// GetFormula 現在の式を取得する
+func (r *Room) GetFormula() *Formula {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	return r.CurrentFormula
+}
+
+// HasFormula 式が既に生成されているかチェック
+func (r *Room) HasFormula() bool {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	return r.CurrentFormula != nil
+}
+
+// createFormula 式を生成する（game.CreateFormulaと同じロジック）
+func (r *Room) createFormula() Formula {
+	//式を生成する
+	operators := []string{"+", "-", "×", "÷"}
+
+	// ルームIDをシードとして使用して、同じルームでは同じ式が生成されるようにする
+	var seed int64
+	for _, char := range r.ID {
+		seed += int64(char)
+	}
+
+	source := rand.NewSource(seed)
+	randGen := rand.New(source)
+
+	randomNumber1 := randGen.Intn(10) + 1
+	randomNumber2 := randGen.Intn(10) + 1
+
+	operator := operators[randGen.Intn(len(operators))]
+
+	Question := fmt.Sprintf("%d %s %d", randomNumber1, operator, randomNumber2)
+
+	//生成された式の答えを計算
+	Answer := 0
+	switch operator {
+	case "+":
+		Answer = randomNumber1 + randomNumber2
+	case "-":
+		Answer = randomNumber1 - randomNumber2
+	case "×":
+		Answer = randomNumber1 * randomNumber2
+	case "÷":
+		// 0除算が起こらない前提
+		Answer = randomNumber1 / randomNumber2
+	}
+
+	return Formula{
+		Question: Question,
+		Answer:   Answer,
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/mitsui6969/Zerofy/backend/internal/game"
 	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
 )
 
