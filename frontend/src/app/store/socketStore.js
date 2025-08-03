@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { usePlayerStore } from '../features/payer/playerStore';
 
 export const useSocketStore = create((set, get) => ({
     ws: null, // WebSocketのインスタンスを保持
@@ -65,7 +66,32 @@ export const useSocketStore = create((set, get) => ({
                             currentPoints: message.Points || 0,
                             phase: 'QUESTION'
                         });
-                        console.log('Formula received:', message.Question, 'Points:', message.Points);
+                        
+                        // ポイント関係のログ出力
+                        console.log('=== 計算式受信ログ ===');
+                        console.log('問題のポイント:', message.Points);
+                        
+                        return;
+                    }
+
+                    // 勝敗結果メッセージ
+                    if (message.type === 'RESULT') {
+                        set({ 
+                            phase: 'RESULT',
+                            winner: message.winner,
+                            correctAnswer: message.answer
+                        });
+                        
+                        // プレイヤーストアのポイントを更新
+                        const playerStore = usePlayerStore.getState();
+                        playerStore.processResult(message.winner, playerStore.myPlayer.bet, playerStore.opponent.bet);
+                        
+                        // 更新後のポイントをログ出力
+                        const updatedState = usePlayerStore.getState();
+                        console.log('=== 勝敗結果受信ログ ===');
+                        console.log('更新後の自分のポイント:', updatedState.myPlayer.point);
+                        console.log('更新後の相手のポイント:', updatedState.opponent.point);
+                        
                         return;
                     }
 

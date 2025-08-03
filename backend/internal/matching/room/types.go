@@ -14,6 +14,8 @@ type Player struct {
 	Name     string
 	JoinedAt time.Time
 	Ready    bool
+	Point    int // プレイヤーのポイント
+	Bet      int // プレイヤーのベット額
 }
 
 type RoundResult struct {
@@ -40,6 +42,7 @@ type Room struct {
 
 	roundResults   []RoundResult
 	CurrentFormula *Formula
+	winner         string // 現在のラウンドの勝者
 }
 
 func (r *Room) AddRoundResults(P1id string, P1po int, P2id string, P2po int) {
@@ -90,6 +93,8 @@ func NewPlayer(id, name string) *Player {
 		Name:     name,
 		JoinedAt: time.Now(),
 		Ready:    false,
+		Point:    20, // 初期ポイント
+		Bet:      0,  // 初期ベット額
 	}
 }
 
@@ -226,6 +231,7 @@ func (r *Room) GenerateFormula() {
 
 	formula := r.createFormula()
 	r.CurrentFormula = &formula
+	r.winner = "" // 新しいラウンドなので勝者をリセット
 	log.Printf("Room %s: Generated formula: %s = %d", r.ID, formula.Question, formula.Answer)
 }
 
@@ -241,6 +247,90 @@ func (r *Room) HasFormula() bool {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 	return r.CurrentFormula != nil
+}
+
+// SetPlayerBet プレイヤーのベット額を設定
+func (r *Room) SetPlayerBet(playerID string, bet int) error {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	player, exists := r.Players[playerID]
+	if !exists {
+		return ErrPlayerNotFound
+	}
+
+	player.Bet = bet
+	return nil
+}
+
+// GetPlayerPoint プレイヤーのポイントを取得
+func (r *Room) GetPlayerPoint(playerID string) (int, error) {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	player, exists := r.Players[playerID]
+	if !exists {
+		return 0, ErrPlayerNotFound
+	}
+
+	return player.Point, nil
+}
+
+// ProcessAnswer 回答を処理して勝敗判定とポイント処理を行う
+func (r *Room) ProcessAnswer(playerID string, answer int) (string, error) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	// プレイヤーが存在するかチェック
+	player, exists := r.Players[playerID]
+	if !exists {
+		return "", ErrPlayerNotFound
+	}
+
+	// 式が存在するかチェック
+	if r.CurrentFormula == nil {
+		return "", errors.New("no formula available")
+	}
+
+	// 既に勝者が決まっている場合は何もしない
+	if r.winner != "" {
+		return "", nil
+	}
+
+	// 正解かどうかチェック
+	if answer != r.CurrentFormula.Answer {
+		return "", nil // 不正解の場合は勝者なし
+	}
+
+	// 正解の場合、そのプレイヤーが勝者（最初に正解したプレイヤー）
+	r.winner = playerID
+
+	// ポイント処理：勝ったプレイヤーのポイントを減らす
+	player.Point -= player.Bet
+	if player.Point < 0 {
+		player.Point = 0
+	}
+
+	return r.winner, nil
+}
+
+// GetPlayerList プレイヤーIDのリストを取得
+func (r *Room) GetPlayerList() []string {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	players := make([]string, 0, len(r.Players))
+	for playerID := range r.Players {
+		players = append(players, playerID)
+	}
+	return players
+}
+
+// GetWinner 現在のラウンドの勝者を取得
+func (r *Room) GetWinner() string {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	return r.winner
 }
 
 // createFormula 式を生成する（game.CreateFormulaと同じロジック）

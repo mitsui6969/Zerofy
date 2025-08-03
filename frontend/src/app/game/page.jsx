@@ -14,6 +14,7 @@ export default function GamePage() {
     const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
     const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
 
+
     const playSound = () => {
         const audio = new Audio("/sound/クリック.mp3");
         audio.play();
@@ -23,6 +24,14 @@ export default function GamePage() {
         const audio = new Audio("/sound/決定ボタンを押す5.mp3")
         audio.play();
     }
+
+
+    const handlePlayAgain = () => {
+        // 次のラウンドを開始する処理
+        // ここでサーバーに次のラウンド開始を要求する
+        console.log('Play again clicked');
+    };
+
 
     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
@@ -72,7 +81,7 @@ export default function GamePage() {
                     <main className="p-8">
                     {phase === 'BET' && <BetPhase ws={ws} />}
                     {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
-                    {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
+                    {phase === 'RESULT' && <ResultPhase onPlayAgain={handlePlayAgain} />}
                     {phase === 'END' && <EndPhase />}
                     {phase === 'WAIT' && <p>Waiting for opponent...</p>}
                     </main>

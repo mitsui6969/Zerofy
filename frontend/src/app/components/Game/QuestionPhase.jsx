@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSocketStore } from '../../store/socketStore';
+import { usePlayerStore } from '../../features/payer/playerStore';
 
 export default function QuestionPhase() {
     const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState } = useSocketStore();
+    const { myPlayer, opponent } = usePlayerStore();
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
     const [isStarted, setIsStarted] = useState(false);
@@ -63,8 +65,11 @@ export default function QuestionPhase() {
         const elapsed = endTime - startTimeRef.current;
         const elapsedSeconds = elapsed / 1000; // 秒数に変換
 
-        // コンソールで回答時間を確認
-        console.log('回答時間:', elapsedSeconds.toFixed(2) + '秒');
+        // ポイント関係のログ出力
+        console.log('=== 回答送信ログ ===');
+        console.log('自分のポイント:', myPlayer.point);
+        console.log('相手のポイント:', opponent.point);
+        console.log('問題のポイント:', currentPoints);
         console.log('送信データ:', {
             type: 'Answer',
             roomID: '',
@@ -93,6 +98,20 @@ export default function QuestionPhase() {
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">計算式に答えてください！</h2>
+            
+            {/* ポイント表示 */}
+            <div className="mb-4 p-3 bg-gray-100 rounded">
+                <div className="flex justify-between items-center">
+                    <div>
+                        <span className="font-semibold">あなたのポイント: </span>
+                        <span className="text-blue-600 font-bold">{myPlayer.point}</span>
+                    </div>
+                    <div>
+                        <span className="font-semibold">相手のポイント: </span>
+                        <span className="text-red-600 font-bold">{opponent.point}</span>
+                    </div>
+                </div>
+            </div>
             
             {!isReady ? (
                 <div>
