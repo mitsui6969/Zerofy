@@ -11,7 +11,7 @@ import Link from "next/link";
 export default function GamePage() {
 
     const data = useSocketStore((state) => state.room) // サーバーからのフェーズデータ
-    const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
+    const socket = useSocketStore((state) => state.socket); // WebSocketのインスタンス
     const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
 
     const handlePlayAgain = () => {
