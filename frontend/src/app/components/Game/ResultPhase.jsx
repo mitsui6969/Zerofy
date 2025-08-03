@@ -8,7 +8,7 @@ export default function ResultPhase({ data, }) {
         yourPoints = 100, 
         opponentPoints = 100 
     } = data || {};
-
+    
 
     return (
         <div>

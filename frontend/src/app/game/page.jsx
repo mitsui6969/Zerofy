@@ -13,7 +13,7 @@ export default function GamePage() {
     const phase = useSocketStore((state) => state.phase); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
     const setPhase = useSocketStore((state) => state.setPhase); // フェーズを更新する関数
 
-    // 実際に画面に表示するフェーズ
+     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
     const [showMatched, setShowMatched] = useState(false);
 

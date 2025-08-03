@@ -10,7 +10,7 @@ export const useSocketStore = create((set, get) => ({
     points: 20, // 初期ポイント
     setPhase: (newPhase) => set({ phase: newPhase }), // フェーズを更新する関数
 
-    // 1. WebSocketに接続する関数
+    // 1. WbSocketに接続する関数
     connect: (initialMessage) => {
         // 既に接続済みの場合は何もしない
         if (get().socket) return;
