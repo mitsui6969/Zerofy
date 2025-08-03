@@ -14,7 +14,6 @@
     z-index: 0;
 }
 
-
 .circle-top-right {
     width: 800px;
     height: 500px;
@@ -23,7 +22,6 @@
     right: 0;
     transform: translate(50%, -50%);
 }
-
 
 .circle-bottom-left {
     width: 1200px;
@@ -41,6 +39,7 @@
     color: #FFFF;
     z-index: 1;
 }
+
 .cancel {
     position: fixed;
     bottom: 20px;
@@ -59,4 +58,59 @@
 
 .cancel button:hover {
     background-color: #ab1b1b;
+}
+
+/* 👇 追加：合体アニメーション用の共通クラス */
+.circle.merge {
+    width: 100px;
+    height: 100px;
+    transform: translate(-50%, -50%) scale(0.8);
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transition: all 1.2s ease-in-out;
+    z-index: 5;
+}
+
+/* 👇 追加：マッチング完了メッセージ用アニメーション */
+.match-text {
+    position: absolute;
+    bottom: 15%;
+    color: white;
+    font-size: 2.5rem;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    z-index: 10;
+}
+
+.match-text.show {
+    opacity: 1;
+    transform: scale(1);
+}
+.matching-text {
+    position: relative;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #bd1717;
+    z-index: 1;
+  opacity: 1; /* 初期は見える */
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.match-text {
+    position: absolute;
+    bottom: 15%;
+    color: rgb(189, 41, 41);
+    font-size: 2.5rem;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    z-index: 10;
+    }
+
+.match-text.show {
+    opacity: 1;
+    transform: scale(1);
 }
