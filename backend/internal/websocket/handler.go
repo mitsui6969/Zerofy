@@ -111,7 +111,7 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 	// ★2人そろったらゲーム開始通知を全員に送信
 	if joinedRoom.IsFull() {
 		startMsg := map[string]interface{}{
-			"type": "BET",
+			"type": "QUESTION",
 			"room": room.ToRoomResponse(joinedRoom), // ルーム情報を整形
 		}
 		res, _ := json.Marshal(startMsg)
