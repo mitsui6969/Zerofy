@@ -40,13 +40,13 @@ export default function GamePage() {
         <>
             {displayPhase === 'WAIT'? (
                 <div className="matching">
-                    <div className="circle circle-top-right"></div>
-                    <div className="circle circle-bottom-left"></div>
+                    <div className={`circle circle-top-right ${showMatched ? "merge" : ""}`}></div>
+                    <div className={`circle circle-bottom-left ${showMatched ? "merge" : ""}`}></div>
 
-                    <h1>
+                    <h1 className={showMatched ? "match-text show" : "matching-"}>
                         {showMatched ? "マッチングしました！" : "相手を探しています..."}
                     </h1>
-
+                    
                     {!showMatched && (
                         <div className='cancel'>
                             <Link href='/'>
