@@ -86,35 +86,6 @@ func (rm *RoomManager) JoinOrCreateRoom(roomID, playerID, playerName string, fri
     return r, nil
 }
 
-// // CreateRoom 新しいルームを作成する
-// func (rm *RoomManager) CreateRoom(name string) (*Room, error) {
-// 	rm.mutex.Lock()
-// 	defer rm.mutex.Unlock()
-
-// 	// ルーム名の妥当性チェック
-// 	if len(name) == 0 || len(name) > MaxRoomNameLength {
-// 		return nil, ErrInvalidRoomName
-// 	}
-
-// 	// ユニークなルームIDを生成
-// 	roomID := generateRoomID(false)
-// 	if _, exists := rm.rooms[roomID]; exists {
-// 		return nil, fmt.Errorf("room ID %s already exists", roomID)
-// 	}
-
-// 	// 新しいルームを作成してマップに追加
-// 	room := NewRoom(roomID, name)
-// 	rm.rooms[roomID] = room
-// 	return room, nil
-// }
-
-// // generateRoomID ランダムなルームIDを生成
-// func generateRoomID() string {
-// 	bytes := make([]byte, 4)
-// 	rand.Read(bytes)
-// 	return hex.EncodeToString(bytes)
-// }
-
 // JoinRoom プレイヤーをルームに参加させる
 func (rm *RoomManager) JoinRoom(roomID, playerID, playerName string) error {
 	// ルームの存在確認

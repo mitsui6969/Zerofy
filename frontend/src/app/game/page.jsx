@@ -8,13 +8,11 @@ import "../style/game.css"
 import Link from "next/link";
 
 export default function GamePage() {
-    // const [phase, setPhase] = useState('WAIT'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
-    const [data, setData] = useState(null); // サーバーからのフェーズデータ
-    const [ws, setWs] = useState(null);
-    const phase = useSocketStore((state) => state.phase);
+    const data = useSocketStore((state) => state.room) // サーバーからのフェーズデータ
+    const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
+    const phase = useSocketStore((state) => state.phase); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
 
     useEffect(() => {
-        // console.log("/game移動");
     }, []);
 
     return (

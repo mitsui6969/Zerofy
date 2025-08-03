@@ -21,9 +21,8 @@ export const useSocketStore = create((set, get) => ({
             set({ socket: ws, isConnected: true });
             // 接続が確立したらJOINメッセージを送信
             if (initialMessage) {
-                get().sendMessage(initialMessage); // ←引数を送信
+                get().sendMessage(initialMessage);
             }
-            // get().sendMessage("フロントから接続しました");
         };
 
         // メッセージ受信時の処理
