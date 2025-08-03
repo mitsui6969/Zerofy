@@ -73,6 +73,24 @@ func (c *Client) readPump() {
 				} else {
 					log.Printf("No formula available for room %s", c.room.ID)
 				}
+			case "Answer":
+				// 回答メッセージの処理
+				if answer, ok := msg["Answer"].(float64); ok {
+					if time, ok := msg["Time"].(float64); ok {
+						if points, ok := msg["Points"].(float64); ok {
+							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f", 
+								c.playerID, answer, time, points)
+						} else {
+							log.Printf("Player %s answered: %v, Time: %.2fs", 
+								c.playerID, answer, time)
+						}
+					}
+				}
+				// 回答メッセージもブロードキャスト
+				c.hub.broadcast <- Broadcast{
+					RoomID:  c.room.ID,
+					Message: message,
+				}
 			default:
 				// その他のメッセージはブロードキャスト
 				c.hub.broadcast <- Broadcast{

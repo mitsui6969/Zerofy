@@ -25,6 +25,7 @@ type RoundResult struct {
 type Formula struct {
 	Question string
 	Answer   int
+	Points   int // 演算子ごとのポイント
 }
 
 type Room struct {
@@ -224,20 +225,27 @@ func (r *Room) createFormula() Formula {
 
 	//生成された式の答えを計算
 	Answer := 0
+	Points := 0 // 演算子ごとのポイント
+	
 	switch operator {
 	case "+":
 		Answer = randomNumber1 + randomNumber2
+		Points = 2 // +演算子は2ポイント
 	case "-":
 		Answer = randomNumber1 - randomNumber2
+		Points = 2 // -演算子は2ポイント
 	case "×":
 		Answer = randomNumber1 * randomNumber2
+		Points = 5 // ×演算子は5ポイント
 	case "÷":
 		// 0除算が起こらない前提
 		Answer = randomNumber1 / randomNumber2
+		Points = 5 // ÷演算子は5ポイント
 	}
 
 	return Formula{
 		Question: Question,
 		Answer:   Answer,
+		Points:   Points,
 	}
 }

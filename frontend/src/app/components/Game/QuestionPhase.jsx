@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSocketStore } from '../../store/socketStore';
 
 export default function QuestionPhase() {
-    const { socket, isConnected, currentFormula } = useSocketStore();
+    const { socket, isConnected, currentFormula, currentPoints } = useSocketStore();
     const [expression, setExpression] = useState(""); // 式を保持
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
@@ -84,14 +84,16 @@ export default function QuestionPhase() {
             type: 'Answer',
             roomID: '',
             Answer: parseFloat(answer),
-            Time: elapsedSeconds
+            Time: elapsedSeconds,
+            Points: currentPoints
         });
 
         socket.send(JSON.stringify({
             type: 'Answer',
             roomID: '', // roomIDは現在空文字列、必要に応じて設定
             Answer: parseFloat(answer),
-            Time: elapsedSeconds
+            Time: elapsedSeconds,
+            Points: currentPoints
         }));
         setAnswer('');
         setElapsedMs(elapsed); // ここで経過時間を保存（表示用はミリ秒のまま）
@@ -108,7 +110,10 @@ export default function QuestionPhase() {
             <h2 className="text-xl font-bold mb-4">計算式に答えてください！</h2>
             {isStarted ? (
                 expression ? (
-                    <p className="text-lg mb-4">{expression} = ?</p>
+                    <div>
+                        <p className="text-lg mb-2">{expression} = ?</p>
+                        <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>
+                    </div>
                 ) : (
                     <p>問題を待機中...</p>
                 )

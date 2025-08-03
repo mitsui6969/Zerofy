@@ -9,6 +9,7 @@ export const useSocketStore = create((set, get) => ({
     player: null, // プレイヤー情報を保持
     points: 20, // 初期ポイント
     currentFormula: null, // 現在の計算式
+    currentPoints: 0, // 現在の問題のポイント
 
     // 1. WebSocketに接続する関数
     connect: (initialMessage) => {
@@ -43,8 +44,11 @@ export const useSocketStore = create((set, get) => ({
                 
                 // QUESTIONメッセージの場合は式も保存
                 if (message.type === 'QUESTION' && message.formula) {
-                    set({ currentFormula: message.formula });
-                    console.log('Formula saved in store:', message.formula.Question);
+                    set({ 
+                        currentFormula: message.formula,
+                        currentPoints: message.formula.Points || 0
+                    });
+                    console.log('Formula saved in store:', message.formula.Question, 'Points:', message.formula.Points);
                 }
             }
         };
