@@ -12,20 +12,20 @@ export default function GamePage() {
 
     const data = useSocketStore((state) => state.room) // サーバーからのフェーズデータ
     const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
-    const phase = useSocketStore((state) => state.phase); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
+    const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
 
     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
     const [showMatched, setShowMatched] = useState(false);
 
     useEffect(() => {
-        if (phase === 'BET') {
-            // BETになった瞬間に「マッチングしました」を表示して、1.5秒後にBET画面へ
+        if (phase === 'QUESTION') {
+            // QUESTIONになった瞬間に「マッチングしました」を表示して、1.5秒後にBET画面へ
             setDisplayPhase('WAIT');
             setShowMatched(true);
 
             const timer = setTimeout(() => {
-                setDisplayPhase('BET');
+                setDisplayPhase('QUESTION');
                 setShowMatched(false);
             }, 1500);
 
