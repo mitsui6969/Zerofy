@@ -14,6 +14,8 @@ export const useSocketStore = create((set, get) => ({
     currentPoints: 0, // 現在の問題のポイント
     readyPlayers: new Set(), // 準備完了したプレイヤーを管理
     formula: null, // 計算式を保持
+    isIncorrect: false, // 不正解フラグ
+    incorrectAnswer: null, // 不正解の回答
 
     // 1. WbSocketに接続する関数
     connect: (initialMessage) => {
@@ -99,15 +101,25 @@ export const useSocketStore = create((set, get) => ({
 
                     // 勝敗結果メッセージ
                     if (message.type === 'RESULT') {
+                        const playerStore = usePlayerStore.getState();
+                        const isWinner = message.winner === playerStore.myPlayer.id;
+                        
+                        console.log('=== RESULTメッセージ受信ログ ===');
+                        console.log('勝者:', message.winner);
+                        console.log('自分のID:', playerStore.myPlayer.id);
+                        console.log('正解:', message.answer);
+                        console.log('自分が勝者か:', isWinner);
+                        
                         set({ 
                             phase: 'RESULT',
                             winner: message.winner,
                             correctAnswer: message.answer,
-                            formula: null // 次のラウンドのために計算式をクリア
+                            formula: null, // 次のラウンドのために計算式をクリア
+                            isIncorrect: !isWinner, // 勝者でない場合は不正解
+                            incorrectAnswer: !isWinner ? message.answer : null // 不正解の場合は正解を表示
                         });
                         
                         // プレイヤーストアのポイントを更新
-                        const playerStore = usePlayerStore.getState();
                         if (playerStore.myPlayer.bet !== null && playerStore.opponent.bet !== null) {
                             playerStore.processResult(message.winner, playerStore.myPlayer.bet, playerStore.opponent.bet);
                             
@@ -194,5 +206,10 @@ export const useSocketStore = create((set, get) => ({
     // 4. 準備状態をリセットする関数
     resetReadyState: () => {
         set({ readyPlayers: new Set() });
+    },
+
+    // 5. 不正解状態をリセットする関数
+    resetIncorrectState: () => {
+        set({ isIncorrect: false, incorrectAnswer: null });
     },
 }));
