@@ -37,8 +37,8 @@ type Room struct {
 	IsActive   bool
 	mutex      sync.RWMutex
 
-	roundResults []RoundResult
-	CurrentFormula *Formula // 現在のラウンドの式
+	roundResults   []RoundResult
+	CurrentFormula *Formula
 }
 
 func (r *Room) AddRoundResults(P1id string, P1po int, P2id string, P2po int) {
@@ -215,8 +215,9 @@ func (r *Room) ResetPlayerReady() {
 
 	for _, player := range r.Players {
 		player.Ready = false
+	}
+}
 
-    
 // GenerateFormula ルーム用の式を生成する
 func (r *Room) GenerateFormula() {
 	r.mutex.Lock()
