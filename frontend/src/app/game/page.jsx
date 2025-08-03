@@ -5,9 +5,13 @@ import QuestionPhase from '@/app/components/Game/QuestionPhase';
 import ResultPhase from '@/app/components/Game/ResultPhase';
 
 export default function GamePage() {
-    const [phase, setPhase] = useState('BET'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
+    const [phase, setPhase] = useState('RESULT'); // 'BET' | 'QUESTION' | 'RESULT' | 'WAIT'
     const [data, setData] = useState(null); // サーバーからのフェーズデータ
     const [ws, setWs] = useState(null);
+
+    const handlePlayAgain = () => {
+        setPhase('BET');
+    };
 
     useEffect(() => {
         const socket = new WebSocket('ws://localhost:8080/ws');
@@ -36,7 +40,7 @@ export default function GamePage() {
         <main className="p-8">
         {phase === 'BET' && <BetPhase ws={ws} />}
         {phase === 'QUESTION' && <QuestionPhase data={data} ws={ws} />}
-        {phase === 'RESULT' && <ResultPhase data={data} />}
+        {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}
         {phase === 'WAIT' && <p>Waiting for opponent...</p>}
         </main>
     );

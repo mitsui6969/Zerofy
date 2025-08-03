@@ -1,20 +1,29 @@
 import React from 'react';
-
-export default function ResultPhase({ data }) {
-    const { winnerID, yourPoints, opponentPoints } = data;
-
+import '../../style/result.css';
+export default function ResultPhase({ data, onPlayAgain }) {
+    //const { winnerID, yourPoints, opponentPoints } = data;
+    const { 
+        winnerID = 'you', 
+        yourPoints = 100, 
+        opponentPoints = 100 
+    } = data || {};
     return (
         <div>
-        <h2 className="text-xl font-bold mb-4">ラウンド結果</h2>
-        <p>
+        <h2 className="title">Game Results</h2>
+        <div className="box">
+        <p className= "name">
             {winnerID === 'you'
             ? '🎉 あなたの勝ち！'
             : winnerID === 'opponent'
             ? '😢 相手の勝ち'
             : '同着'}
         </p>
-        <p className="mt-4">あなたの残りポイント: {yourPoints}</p>
-        <p>相手の残りポイント: {opponentPoints}</p>
+        <p className="mypoint">あなたの残りポイント:{yourPoints}</p>
+        <p className="yourpoint">相手の残りポイント:{opponentPoints}</p>
+        </div>
+        <div className="again">
+        <button onClick={onPlayAgain}>play again</button>
+        </div>
         </div>
     );
 }
