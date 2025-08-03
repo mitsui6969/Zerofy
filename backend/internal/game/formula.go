@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 
@@ -45,7 +46,8 @@ func CreateFormula() Formula {
 	case "÷":
 		Point = 5
 		// 0除算が起こらない前提
-		Answer = float64(randomNumber1) / float64(randomNumber2)
+		rawAnswer := float64(randomNumber1) / float64(randomNumber2)
+		Answer = math.Round(rawAnswer*10) / 10
 	}
 
 	return Formula{
