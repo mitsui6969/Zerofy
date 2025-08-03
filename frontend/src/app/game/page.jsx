@@ -14,12 +14,23 @@ export default function GamePage() {
     const ws = useSocketStore((state) => state.ws); // WebSocketのインスタンス
     const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
 
+    const playSound = () => {
+        const audio = new Audio("/sound/クリック.mp3");
+        audio.play();
+    };
+
+    const correctMatchingSound = () => {
+        const audio = new Audio("/sound/決定ボタンを押す5.mp3")
+        audio.play();
+    }
+
     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
     const [showMatched, setShowMatched] = useState(false);
 
     useEffect(() => {
         if (phase === 'QUESTION') {
+            correctMatchingSound();
             // QUESTIONになった瞬間に「マッチングしました」を表示して、1.5秒後にBET画面へ
             setDisplayPhase('WAIT');
             setShowMatched(true);
@@ -49,8 +60,10 @@ export default function GamePage() {
                     
                     {!showMatched && (
                         <div className='cancel'>
-                            <Link href='/'>
-                                <button>キャンセル</button>
+                            <Link href='/' passHref legacyBehavior>
+                                <a onClick={playSound}>
+                                    <button>キャンセル</button>
+                                </a>
                             </Link>
                         </div>
                     )}
