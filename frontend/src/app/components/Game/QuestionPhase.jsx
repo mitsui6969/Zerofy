@@ -1,55 +1,102 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSocketStore } from '../../store/socketStore';
 
-export default function QuestionPhase({ data, ws }) {
-    const [isStarted, setIsStarted] = useState(false);
-    const { expression } = "1+1"; // 仮のデータ
-    // const { expression } = data; // 実際のデータを使用する場合はこちら
+export default function QuestionPhase() {
+    const { socket, isConnected } = useSocketStore();
+    const [expression, setExpression] = useState(""); // 式を保持
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
+    const [isStarted, setIsStarted] = useState(false);
     const inputRef = useRef(null);
-    // 問題表示から回答までの時間を計測するためのタイマー処理
     const startTimeRef = useRef(null);
 
+    // コンポーネントマウント時に問題を要求
+    useEffect(() => {
+        if (socket) {
+            socket.send(JSON.stringify({
+                type: 'START_GAME'
+            }));
+            console.log('Requested formula on mount');
+        }
+    }, [socket]);
+
+    // WebSocket受信処理
+    useEffect(() => {
+        if (!socket) return;
+        
+        const handleMessage = (event) => {
+            console.log('QuestionPhase received:', event.data);
+            try {
+                const message = JSON.parse(event.data);
+                
+                // Formulaオブジェクトが直接送信されている場合
+                if (message.Question) {
+                    setExpression(message.Question);
+                    console.log('Formula received:', message.Question);
+                }
+                // payloadの中にQuestionがある場合（既存の処理）
+                else if (message.payload && message.payload.Question) {
+                    setExpression(message.payload.Question);
+                    console.log('Formula received from payload:', message.payload.Question);
+                }
+            } catch (error) {
+                console.error('Error parsing message:', error);
+            }
+        };
+
+        socket.addEventListener('message', handleMessage);
+        
+        return () => {
+            socket.removeEventListener('message', handleMessage);
+        };
+    }, [socket]);
+
+    // スペースキーで開始
     useEffect(() => {
         const handleStartGame = (e) => {
             if (!isStarted && e.key === ' ') {
                 e.preventDefault();
                 setIsStarted(true);
+                startTimeRef.current = Date.now();
             }
         };
 
         document.addEventListener('keydown', handleStartGame);
-
-        if (isStarted && inputRef.current) {
-            inputRef.current.focus();
-        }
 
         return () => {
             document.removeEventListener('keydown', handleStartGame);
         };
     }, [isStarted]);
 
+    // 入力フィールドにフォーカス
     useEffect(() => {
-        if (isStarted) {
-            startTimeRef.current = Date.now();
-            setElapsedMs(null); // 問題表示時に前回のタイマーをリセット
+        if (isStarted && inputRef.current) {
+            inputRef.current.focus();
         }
     }, [isStarted]);
 
     const handleSubmit = () => {
         const endTime = Date.now();
         const elapsed = endTime - startTimeRef.current;
+        const elapsedSeconds = elapsed / 1000; // 秒数に変換
 
-        ws.send(JSON.stringify({
-            type: 'ANSWER',
-            payload: {
-                answer: parseFloat(answer),
-                timeAt: new Date().toISOString(),
-                elapsedMs: elapsed,
-            },
+        // コンソールで回答時間を確認
+        console.log('回答時間:', elapsedSeconds.toFixed(2) + '秒');
+        console.log('送信データ:', {
+            type: 'Answer',
+            roomID: '',
+            Answer: parseFloat(answer),
+            Time: elapsedSeconds
+        });
+
+        socket.send(JSON.stringify({
+            type: 'Answer',
+            roomID: '', // roomIDは現在空文字列、必要に応じて設定
+            Answer: parseFloat(answer),
+            Time: elapsedSeconds
         }));
         setAnswer('');
-        setElapsedMs(elapsed); // ここで経過時間を保存
+        setElapsedMs(elapsed); // ここで経過時間を保存（表示用はミリ秒のまま）
     };
 
     const handleKeyDown = (e) => {
@@ -62,7 +109,11 @@ export default function QuestionPhase({ data, ws }) {
         <div>
             <h2 className="text-xl font-bold mb-4">計算式に答えてください！</h2>
             {isStarted ? (
-                <p className="text-lg mb-4">{expression} = ?</p>
+                expression ? (
+                    <p className="text-lg mb-4">{expression} = ?</p>
+                ) : (
+                    <p>問題を待機中...</p>
+                )
             ) : (
                 <p>スペースキーで準備完了！<br />Enterで解答を送信できます！</p>
             )}
@@ -71,7 +122,7 @@ export default function QuestionPhase({ data, ws }) {
                 value={answer}
                 onChange={(e) => {
                     const value = e.target.value;
-                    if (value.match(/^[0-9.]*$/)) {
+                    if (value.match(/^-?[0-9.]*$/)) {
                         setAnswer(value);
                     }
                 }}

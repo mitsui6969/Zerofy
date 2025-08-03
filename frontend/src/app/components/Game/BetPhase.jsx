@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import { useSocketStore } from '../../store/socketStore';
 import '../../style/point.css';
-export default function BetPhase({ ws }) {
+
+export default function BetPhase() {
+    const { socket } = useSocketStore();
     const [bet, setBet] = useState(1);
 
     const handleSubmit = () => {
-        ws.send(JSON.stringify({
-        type: 'BET',
-        payload: { point: bet },
-        }));
+        if (socket) {
+            socket.send(JSON.stringify({
+                type: 'BET',
+                payload: { point: bet },
+            }));
+        }
     };
 
     return (
@@ -30,4 +35,4 @@ export default function BetPhase({ ws }) {
         </button>
         </div>
     );
-    }
+}

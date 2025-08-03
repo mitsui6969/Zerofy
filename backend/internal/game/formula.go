@@ -1,9 +1,12 @@
 package game
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 type Formula struct {
@@ -43,4 +46,12 @@ func CreateFormula() Formula {
 		Question: Question,
 		Answer:   Answer,
 	}
+}
+
+func SendFormula(wsConn *websocket.Conn, formula Formula) error {
+	jsonData, err := json.Marshal(formula)
+	if err != nil {
+		return err
+	}
+	return wsConn.WriteMessage(websocket.TextMessage, jsonData)
 }
