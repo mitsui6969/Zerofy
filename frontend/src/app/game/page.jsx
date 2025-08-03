@@ -11,8 +11,23 @@ import Link from "next/link";
 export default function GamePage() {
 
     const data = useSocketStore((state) => state.room) // サーバーからのフェーズデータ
+
     const socket = useSocketStore((state) => state.socket); // WebSocketのインスタンス
     const phase = useSocketStore((state) => state.phase); // 'QUESTION' | 'RESULT' | 'WAIT'
+
+    const setPhase = useSocketStore((state) => state.setPhase); // フェーズを更新する関数
+
+
+    const playSound = () => {
+        const audio = new Audio("/sound/クリック.mp3");
+        audio.play();
+    };
+
+    const correctMatchingSound = () => {
+        const audio = new Audio("/sound/決定ボタンを押す5.mp3")
+        audio.play();
+    }
+
 
     const handlePlayAgain = () => {
         // 次のラウンドを開始する処理
@@ -20,13 +35,35 @@ export default function GamePage() {
         console.log('Play again clicked');
     };
 
-    // 実際に画面に表示するフェーズ
+     // 実際に画面に表示するフェーズ
     const [displayPhase, setDisplayPhase] = useState('WAIT');
     const [showMatched, setShowMatched] = useState(false);
 
+    
     useEffect(() => {
-        if (phase === 'QUESTION') {
-            // QUESTIONになった瞬間に「マッチングしました」を表示して、1.5秒後にBET画面へ
+        if (phase === 'RESULT') {
+            // RESULTになったら、5秒後にフェーズをQUESTIONに設定する
+            setDisplayPhase('RESULT');
+            const timer = setTimeout(() => {
+                setPhase('QUESTION');
+                // 新しいラウンドの準備のため、準備状態をリセット
+                const socketStore = useSocketStore.getState();
+                socketStore.resetReadyState();
+            }, 5000); // 5秒
+            return () => clearTimeout(timer);
+        } else if (phase === 'BET') {
+            // BETになった瞬間に「マッチングしました」を表示して、1.5秒後にBET画面へ
+            setDisplayPhase('WAIT');
+            setShowMatched(true);
+
+            const timer = setTimeout(() => {
+                setDisplayPhase('BET');
+                setShowMatched(false);
+            }, 1500);
+
+            return () => clearTimeout(timer);
+        } else if (phase === 'QUESTION') {
+            // QUESTIONになった瞬間に「マッチングしました」を表示して、1.5秒後にQUESTION画面へ
             setDisplayPhase('WAIT');
             setShowMatched(true);
 
@@ -40,7 +77,7 @@ export default function GamePage() {
             // それ以外はそのまま同期
             setDisplayPhase(phase);
         }
-    }, [phase]);
+    }, [phase, setPhase]);
 
     return (
         <>
@@ -55,7 +92,7 @@ export default function GamePage() {
                     
                     {!showMatched && (
                         <div className='cancel'>
-                            <Link href='/'>
+                            <Link href='/' onClick={playSound}>
                                 <button>キャンセル</button>
                             </Link>
                         </div>
@@ -63,6 +100,7 @@ export default function GamePage() {
                 </div>
                 ) : (
                     <main className="p-8">
+
                     {phase === 'BET' && <BetPhase ws={socket} />}
                     {phase === 'QUESTION' && <QuestionPhase data={data} ws={socket} />}
                     {phase === 'RESULT' && <ResultPhase data={data} onPlayAgain={handlePlayAgain} />}

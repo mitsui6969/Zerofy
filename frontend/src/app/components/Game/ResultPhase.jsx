@@ -30,7 +30,7 @@ export default function ResultPhase({ onPlayAgain }) {
         <p className="correct-answer">正解: {correctAnswer}</p>
         </div>
         <div className="again">
-        <button onClick={onPlayAgain}>play again</button>
+        <p>5秒後に計算画面に戻ります</p>
         </div>
         </div>
     );

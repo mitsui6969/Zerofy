@@ -83,7 +83,7 @@ func (c *Client) readPump() {
 					go func() {
 						time.Sleep(100 * time.Millisecond)
 
-						// ルームで計算式を生成
+						// 新しいラウンドなので必ず新しい計算式を生成
 						c.room.GenerateFormula()
 						formula := c.room.GetFormula()
 
@@ -94,6 +94,7 @@ func (c *Client) readPump() {
                             "Answer":   formula.Answer,
                             "Pointa":   formula.Point,
                         }
+
 						formulaData, _ := json.Marshal(formulaMsg)
 						c.hub.broadcast <- Broadcast{
 							RoomID:  c.room.ID,
@@ -113,10 +114,10 @@ func (c *Client) readPump() {
 				if answer, ok := msg["Answer"].(float64); ok {
 					if time, ok := msg["Time"].(float64); ok {
 						if points, ok := msg["Points"].(float64); ok {
-							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f", 
+							log.Printf("Player %s answered: %v, Time: %.2fs, Points: %.0f",
 								c.playerID, answer, time, points)
 						} else {
-							log.Printf("Player %s answered: %v, Time: %.2fs", 
+							log.Printf("Player %s answered: %v, Time: %.2fs",
 								c.playerID, answer, time)
 						}
 					}
@@ -130,25 +131,32 @@ func (c *Client) readPump() {
 						log.Printf("Error processing answer: %v", err)
 					} else if result.WinnerID != "" {
 						log.Printf("=== 勝敗判定ログ ===")
+
 						log.Printf("勝者: %s", result.WinnerID)
 						log.Printf("回答: %d", float64(answer))
 						
+
 						// 勝者のポイントを取得してログ出力
 						if point, err := c.room.GetPlayerPoint(result.WinnerID); err == nil {
 							log.Printf("勝者の更新後ポイント: %d", point)
 						}
-						
+
 						// 勝敗結果を全員に送信
 						resultMsg := map[string]interface{}{
+
 							"type": "RESULT",
 							"winner": result.WinnerID,
 							"answer": float64(answer),
+
 						}
 						resultData, _ := json.Marshal(resultMsg)
 						c.hub.broadcast <- Broadcast{
 							RoomID:  c.room.ID,
 							Message: resultData,
 						}
+
+						// 勝敗結果送信後に準備状態をリセット（次のラウンドの準備）
+						c.room.ResetPlayerReady()
 					} else {
 						log.Printf("=== 回答処理ログ ===")
 						log.Printf("プレイヤーID: %s", c.playerID)

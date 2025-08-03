@@ -8,12 +8,15 @@ export const useSocketStore = create((set, get) => ({
     room: null, // 参加したルームの情報を保持
     player: null, // プレイヤー情報を保持
     points: 20, // 初期ポイント
+    setPhase: (newPhase) => set({ phase: newPhase }), // フェーズを更新する関数
     currentFormula: null, // 現在の計算式
     currentPoints: 0, // 現在の問題のポイント
     readyPlayers: new Set(), // 準備完了したプレイヤーを管理
     formula: null, // 計算式を保持
+    isIncorrect: false, // 不正解フラグ
+    incorrectAnswer: null, // 不正解の回答
 
-    // 1. WebSocketに接続する関数
+    // 1. WbSocketに接続する関数
     connect: (initialMessage) => {
         // 既に接続済みの場合は何もしない
         if (get().socket) return;
@@ -44,6 +47,7 @@ export const useSocketStore = create((set, get) => ({
                     // JOIN_SUCCESS の場合は WAIT に設定
                     if (message.type === 'JOIN_SUCCESS') {
                         set({ room: message.room, phase: 'WAIT' });
+
                         console.log('=== JOIN_SUCCESS ログ ===');
                         console.log('myPlayerID:', message.playerID);
                         return;
@@ -58,6 +62,7 @@ export const useSocketStore = create((set, get) => ({
                         console.log('myID:', message.myID);
                         console.log('opponentID:', message.opponentID);
 
+
                         return;
                     }
 
@@ -67,6 +72,19 @@ export const useSocketStore = create((set, get) => ({
                         readyPlayers.add(message.playerID);
                         set({ readyPlayers: new Set(readyPlayers) });
                         console.log('Player ready:', message.playerID);
+                        return;
+                    }
+
+                    // ベットメッセージ
+                    if (message.type === 'Bet') {
+                        const playerStore = usePlayerStore.getState();
+                        if (message.Bet && message.playerID) {
+                            // 相手のベット情報を保存
+                            if (message.playerID !== playerStore.myPlayer.id) {
+                                playerStore.setOpponentBet(message.Bet);
+                                console.log('相手のベット情報を保存しました:', message.Bet);
+                            }
+                        }
                         return;
                     }
 
@@ -80,6 +98,7 @@ export const useSocketStore = create((set, get) => ({
                             phase: 'QUESTION'
                         });
                         console.log('Formula received:', message.Question);
+
                         return;
                     }
 
@@ -114,6 +133,7 @@ export const useSocketStore = create((set, get) => ({
 
                             const playerStore = usePlayerStore.getState();
                             playerStore.processResult(message.winner, currentPoints, currentPoints);
+
                         }
                     }
                 } catch (error) {
@@ -160,5 +180,10 @@ export const useSocketStore = create((set, get) => ({
     // 4. 準備状態をリセットする関数
     resetReadyState: () => {
         set({ readyPlayers: new Set() });
+    },
+
+    // 5. 不正解状態をリセットする関数
+    resetIncorrectState: () => {
+        set({ isIncorrect: false, incorrectAnswer: null });
     },
 }));

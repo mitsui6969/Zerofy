@@ -10,6 +10,10 @@ export default function BetPhase() {
 
     const handleSubmit = () => {
         if (socket) {
+            // プレイヤーストアにベット情報を保存
+            const playerStore = usePlayerStore.getState();
+            playerStore.setMyBet(bet.toString());
+            
             // ポイント関係のログ出力
             console.log('=== ベット送信ログ ===');
             console.log('自分のポイント:', myPlayer.point);
