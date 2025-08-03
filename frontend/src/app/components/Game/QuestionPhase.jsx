@@ -3,12 +3,13 @@ import { useSocketStore } from '../../store/socketStore';
 import { usePlayerStore } from '../../features/payer/playerStore';
 
 export default function QuestionPhase() {
-    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState, phase } = useSocketStore();
+    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState, resetIncorrectState, phase, isIncorrect, incorrectAnswer } = useSocketStore();
     const { myPlayer, opponent } = usePlayerStore();
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
     const [isStarted, setIsStarted] = useState(false);
     const [isReady, setIsReady] = useState(false);
+    const [submittedAnswer, setSubmittedAnswer] = useState(null);
     const inputRef = useRef(null);
     const startTimeRef = useRef(null);
 
@@ -19,7 +20,21 @@ export default function QuestionPhase() {
         setIsStarted(false);
         setAnswer('');
         setElapsedMs(null);
-    }, [phase, resetReadyState]);
+        setSubmittedAnswer(null);
+        
+        // 新しいQUESTIONフェーズの開始時のみ不正解状態をリセット
+        if (phase === 'QUESTION') {
+            resetIncorrectState();
+        }
+    }, [phase, resetReadyState, resetIncorrectState]);
+
+    // 半角数字に変換する関数
+    const convertToHalfWidth = (str) => {
+        return str
+            .replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+            .replace(/[ー－]/g, '-')
+            .replace(/[。]/g, '.');
+    };
 
     // スペースキーで準備完了
     useEffect(() => {
@@ -53,12 +68,16 @@ export default function QuestionPhase() {
         }
     }, [formula, isStarted]);
 
-    // 入力フィールドにフォーカス
+    // 準備完了後またはゲーム開始後に自動的に入力フィールドにフォーカス
     useEffect(() => {
-        if (isStarted && inputRef.current) {
-            inputRef.current.focus();
+        if ((isReady || isStarted) && inputRef.current) {
+            // 少し遅延を入れてフォーカスを設定
+            const timer = setTimeout(() => {
+                inputRef.current.focus();
+            }, 100);
+            return () => clearTimeout(timer);
         }
-    }, [isStarted]);
+    }, [isReady, isStarted]);
 
     const handleSubmit = () => {
         const endTime = Date.now();
@@ -85,6 +104,10 @@ export default function QuestionPhase() {
             Time: elapsedSeconds,
             Points: currentPoints
         }));
+        
+        // 送信した回答を保存
+        setSubmittedAnswer(answer);
+        // 回答を送信したら入力欄をリセット
         setAnswer('');
         setElapsedMs(elapsed); // ここで経過時間を保存（表示用はミリ秒のまま）
     };
@@ -141,14 +164,18 @@ export default function QuestionPhase() {
                         value={answer}
                         onChange={(e) => {
                             const value = e.target.value;
-                            if (value.match(/^-?[0-9.]*$/)) {
-                                setAnswer(value);
+                            // 半角数字に変換
+                            const convertedValue = convertToHalfWidth(value);
+                            // 数字、マイナス記号、小数点のみ許可（ハイフンは先頭のみ）
+                            if (convertedValue.match(/^-?[0-9.]*$/) || convertedValue === '-') {
+                                setAnswer(convertedValue);
                             }
                         }}
                         onKeyDown={handleKeyDown}
                         ref={inputRef}
                         className="border p-2 mr-2"
                         disabled={!isStarted}
+                        placeholder="数字を入力してください"
                     />
                     <button
                         onClick={handleSubmit}
@@ -164,6 +191,20 @@ export default function QuestionPhase() {
                             回答までの時間: {(elapsedMs / 1000).toFixed(2)} 秒
                         </p>
                     )}
+                    
+                    {/* 不正解表示 */}
+                    {isIncorrect && submittedAnswer !== null && (
+                        <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded">
+                            <p className="text-red-700 font-semibold">× {submittedAnswer}</p>
+                        </div>
+                    )}
+                    
+                    {/* デバッグ情報 */}
+                    <div className="mt-2 text-xs text-gray-500">
+                        <p>isIncorrect: {isIncorrect.toString()}</p>
+                        <p>submittedAnswer: {submittedAnswer}</p>
+                        <p>phase: {phase}</p>
+                    </div>
                 </div>
             )}
         </div>
