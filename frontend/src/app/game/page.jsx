@@ -28,7 +28,7 @@ export default function GamePage() {
                 setPhase('QUESTION');
                 const socketStore = useSocketStore.getState();
                 socketStore.resetReadyState();
-            }, 5000);
+            }, 2000); // 2秒
             return () => clearTimeout(timer);
         } else if (phase === 'QUESTION') {
             setDisplayPhase('WAIT');
@@ -39,7 +39,14 @@ export default function GamePage() {
             }, 1500);
             return () => clearTimeout(timer);
         } else if (phase === 'END') {
-            setDisplayPhase('END');
+            // setDisplayPhase('END');
+            const timer = setTimeout(() => {
+                // setPhase('WAIT');
+                setDisplayPhase('END');
+                const socketStore = useSocketStore.getState();
+                socketStore.resetReadyState();
+            }, 1000); // 1秒
+            return () => clearTimeout(timer);
         } else {
             setDisplayPhase(phase);
         }

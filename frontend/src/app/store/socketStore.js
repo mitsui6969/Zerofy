@@ -125,8 +125,10 @@ export const useSocketStore = create((set, get) => ({
 
                     // 終了メッセージ
                     if (message.type === 'END') {
-                        set({ phase: 'END', winner: message.winner });
-                        return;
+                        set({
+                            winner: message.winner,
+                            // roundLogs: message.roundLogs, // サーバーから配列で受け取る
+                        });
                     }
 
                     // フェーズ系のメッセージならphase更新
@@ -205,4 +207,24 @@ export const useSocketStore = create((set, get) => ({
     resetIncorrectState: () => {
         set({ isIncorrect: false, incorrectAnswer: null });
     },
+
+    // クリーンアップ
+    cleanup: () => {
+        const { disconnect, resetReadyState, resetIncorrectState } = get();
+        disconnect();
+        resetReadyState();
+        resetIncorrectState();
+        set({
+            phase: 'WAIT',
+            formula: null,
+            currentFormula: null,
+            currentPoints: 0,
+            winner: null,
+            room: null,
+            isConnected: false,
+            isIncorrect: false,
+            incorrectAnswer: null,
+        });
+    },
+
 }));
