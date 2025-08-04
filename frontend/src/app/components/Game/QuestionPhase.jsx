@@ -222,8 +222,28 @@ export default function QuestionPhase() {
                     </div>
                 </div>
             </div>
-            
-            {!isReady ? (
+            </div>
+        )}
+{!isReady ? (
+    <div className="ready-message-center">
+    <p className="ready-message-large">スペースキーで準備完了！</p>
+    <p className="ready-message-small">両プレイヤーが準備完了すると問題が表示されます</p>
+</div>
+
+        
+) : (
+
+        <div>
+            {countdown !== null ? (
+                <div className="text-center">
+                <div className="text-6xl font-bold text-red-600 mb-4">
+                    {countdown === 'start' ? 'Start!' : countdown}
+                </div>
+                <p className="text-lg text-gray-600">
+                    {countdown === 'start' ? 'ゲーム開始！' : '準備してください！'}
+                </p>
+                </div>
+            ) : !isStarted ? (
                 <div>
                     <p className="text-lg mb-4">スペースキーで準備完了！</p>
                     <p className="text-sm text-gray-600">両プレイヤーが準備完了すると同時に問題が表示されます</p>
