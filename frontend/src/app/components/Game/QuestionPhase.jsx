@@ -3,7 +3,7 @@ import { useSocketStore } from '../../store/socketStore';
 import { usePlayerStore } from '../../features/payer/playerStore';
 
 export default function QuestionPhase() {
-    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState, resetIncorrectState, phase, isIncorrect, incorrectAnswer } = useSocketStore();
+    const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState, resetIncorrectState, phase, isIncorrect } = useSocketStore();
     const { myPlayer, opponent } = usePlayerStore();
     const [answer, setAnswer] = useState('');
     const [elapsedMs, setElapsedMs] = useState(null);
@@ -289,7 +289,7 @@ export default function QuestionPhase() {
                     {/* ここで経過時間を表示 */}
                     {elapsedMs !== null && (
                         <p className="mt-4 text-blue-600">
-                            回答までの時間: {(elapsedMs / 1000).toFixed(2)} 秒
+                            {submittedAnswer}
                         </p>
                     )}
                     
