@@ -14,6 +14,20 @@ export default function QuestionPhase() {
     const inputRef = useRef(null);
     const startTimeRef = useRef(null);
 
+    const inCorrectSound = () => {
+        const audio = new Audio("/sound/ビープ音4.mp3");
+        audio.play();
+    };
+
+    useEffect(() => {
+    if (
+        submittedAnswer !== null &&
+        formula &&
+        Number(submittedAnswer) !== Number(formula.answer)
+    ) {
+        inCorrectSound();
+    }
+}, [submittedAnswer, formula]);
     // コンポーネントマウント時とRESULTフェーズからQUESTIONフェーズに戻る際に準備状態をリセット
     useEffect(() => {
         resetReadyState();
