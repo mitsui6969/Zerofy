@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"sync"
 	"time"
@@ -26,7 +27,7 @@ type RoundResult struct {
 // Formula 計算式の構造体
 type Formula struct {
 	Question string
-	Answer   int
+	Answer   float64
 	Points   int // 演算子ごとのポイント
 }
 
@@ -277,7 +278,7 @@ func (r *Room) GetPlayerPoint(playerID string) (int, error) {
 }
 
 // ProcessAnswer 回答を処理して勝敗判定とポイント処理を行う
-func (r *Room) ProcessAnswer(playerID string, answer int) (string, error) {
+func (r *Room) ProcessAnswer(playerID string, answer float64) (string, error) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
 
@@ -343,22 +344,23 @@ func (r *Room) createFormula() Formula {
 	Question := fmt.Sprintf("%d %s %d", randomNumber1, operator, randomNumber2)
 
 	//生成された式の答えを計算
-	Answer := 0
+	Answer := 0.0
 	Points := 0 // 演算子ごとのポイント
 
 	switch operator {
 	case "+":
-		Answer = randomNumber1 + randomNumber2
+		Answer = float64(randomNumber1 + randomNumber2)
 		Points = 2 // +演算子は2ポイント
 	case "-":
-		Answer = randomNumber1 - randomNumber2
+		Answer = float64(randomNumber1 - randomNumber2)
 		Points = 2 // -演算子は2ポイント
 	case "×":
-		Answer = randomNumber1 * randomNumber2
+		Answer = float64(randomNumber1 * randomNumber2)
 		Points = 5 // ×演算子は5ポイント
 	case "÷":
 		// 0除算が起こらない前提
-		Answer = randomNumber1 / randomNumber2
+		rawAnswer := float64(randomNumber1) / float64(randomNumber2)
+		Answer = math.Round(rawAnswer*10) / 10
 		Points = 5 // ÷演算子は5ポイント
 	}
 

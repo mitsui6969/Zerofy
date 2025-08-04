@@ -136,7 +136,7 @@ func (c *Client) readPump() {
 
 				// 勝敗判定後
 				if answer, ok := msg["Answer"].(float64); ok {
-					winner, err := c.room.ProcessAnswer(c.playerID, int(answer))
+					winner, err := c.room.ProcessAnswer(c.playerID, float64(answer))
 					if err != nil {
 						log.Printf("Error processing answer: %v", err)
 					} else if winner != "" {
@@ -168,7 +168,7 @@ func (c *Client) readPump() {
 						resultMsg := map[string]interface{}{
 							"type":   "RESULT",
 							"winner": winner,
-							"answer": int(answer),
+							"answer": float64(answer),
 							"winnerPoint": func() int {
 								if winner == p1.ID {
 									return result.P1Point
