@@ -166,6 +166,7 @@ export const useSocketStore = create((set, get) => ({
         ws.onclose = () => {
             console.log("✂️ WebSocket disconnected");
             set({ socket: null, isConnected: false, room: null });
+            useSocketStore.getState().cleanup();
         };
 
         ws.onerror = (error) => {

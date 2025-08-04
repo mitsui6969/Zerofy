@@ -3,6 +3,7 @@ import React from 'react';
 import { useSocketStore } from '../../store/socketStore';
 import { usePlayerStore } from '../../features/payer/playerStore';
 import { useRouter } from 'next/navigation';
+import '../../style/endPhase.css';
 
 export default function EndPhase() {
     const winner = useSocketStore(state => state.winner);
