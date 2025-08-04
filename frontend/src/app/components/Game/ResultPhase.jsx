@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSocketStore } from '../../store/socketStore';
 import { usePlayerStore } from '../../features/payer/playerStore';
 import '../../style/result.css';
@@ -16,6 +16,17 @@ export default function ResultPhase({ onPlayAgain }) {
     console.log('winner === opponent.id:', winner === opponent.id);
     console.log('myPlayer.point:', myPlayer.point);
     console.log('opponent.point:', opponent.point);
+
+    const playSound = () => {
+        const audio = new Audio("/sound/決定ボタンを押す40.mp3");
+        audio.play();
+    };
+
+    useEffect(() => {
+        if (winner === myPlayer.id) {
+            playSound();
+        }
+    }, [winner, myPlayer.id]);
 
     // 表示内容も確認
     const displayText = winner === myPlayer.id
