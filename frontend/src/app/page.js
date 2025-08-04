@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation"; 
+import { usePathname, useRouter } from "next/navigation"; 
 import "./style/home.css";
 import { useSocketStore } from "./store/socketStore";
 import "./style/sub_box.css";
@@ -17,6 +17,14 @@ export default function Home() {
   const room = useSocketStore((state) => state.room);
   const isConnected = useSocketStore((state) => state.isConnected);
   const disconnect = useSocketStore((state) => state.disconnect);
+
+   // 1. 別ページから router.push('/home') で遷移した場合のためのリロード処理
+    useEffect(() => {
+      if (sessionStorage.getItem("reloadOnHome")) {
+        sessionStorage.removeItem("reloadOnHome");
+        window.location.reload();
+      }
+  }, []);
 
   useEffect(() => {
     disconnect();
