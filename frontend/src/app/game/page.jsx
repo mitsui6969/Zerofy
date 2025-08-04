@@ -28,7 +28,7 @@ export default function GamePage() {
                 setPhase('QUESTION');
                 const socketStore = useSocketStore.getState();
                 socketStore.resetReadyState();
-            }, 5000);
+            }, 2000); // 2秒
             return () => clearTimeout(timer);
         } else if (phase === 'QUESTION') {
             setDisplayPhase('WAIT');
