@@ -90,10 +90,11 @@ func ServeWs(hub *Hub, rm *room.RoomManager, w http.ResponseWriter, r *http.Requ
 
 	// ★参加成功のメッセージをクライアントに返す
     // これにより、フロントエンドはページ遷移のタイミングを知ることができる
-    joinSuccessMsg := map[string]interface{}{
-        "type": "JOIN_SUCCESS",
-        "room": room.ToRoomResponse(joinedRoom), // ルーム情報を返す
-    }
+	joinSuccessMsg := map[string]interface{}{
+		"type": "JOIN_SUCCESS",
+		"room": room.ToRoomResponse(joinedRoom),
+		"playerID": playerID,
+	}
     res, _ := json.Marshal(joinSuccessMsg)
     conn.WriteMessage(websocket.TextMessage, res)
 

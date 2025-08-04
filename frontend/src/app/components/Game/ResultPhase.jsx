@@ -12,10 +12,12 @@ export default function ResultPhase({ onPlayAgain }) {
         <div className="box">
         <p className="name">
             {winner === myPlayer.id
-            ? '🎉 あなたの勝ち！'
-            : winner === opponent.id
-            ? '😢 相手の勝ち'
-            : '同着'}
+                ? '🎉 あなたの勝ち！'
+                : winner === opponent.id
+                ? '😢 あなたの負け'
+                : winner
+                ? '勝者不明'
+                : ''}
         </p>
         <p className="mypoint">あなたの残りポイント:{myPlayer.point}</p>
         <p className="yourpoint">相手の残りポイント:{opponent.point}</p>

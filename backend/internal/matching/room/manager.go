@@ -12,6 +12,35 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+
+// 1人目のプレイヤーを取得
+func (r *Room) GetPlayer1() *Player {
+    r.mutex.RLock()
+    defer r.mutex.RUnlock()
+    i := 0
+    for _, p := range r.Players {
+        if i == 0 {
+            return p
+        }
+        i++
+    }
+    return nil
+}
+
+// 2人目のプレイヤーを取得
+func (r *Room) GetPlayer2() *Player {
+    r.mutex.RLock()
+    defer r.mutex.RUnlock()
+    i := 0
+    for _, p := range r.Players {
+        if i == 1 {
+            return p
+        }
+        i++
+    }
+    return nil
+}
+
 // 現在のルーム一覧を取得
 func (rm *RoomManager) GetAllRooms() []*Room {
     rm.mutex.Lock()

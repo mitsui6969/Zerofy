@@ -89,6 +89,7 @@ export default function QuestionPhase() {
             // "Start!" と表示した状態で1秒待機
             timer = setTimeout(() => {
                 console.log("Start!表示終了、計算式表示開始");
+                console.log("formula.question:", formula.question); // デバッグ用ログ
                 setIsStarted(true);
                 startTimeRef.current = Date.now();
                 setCountdown(null); // ゲーム開始と同時にカウントダウン状態をリセット
@@ -231,7 +232,7 @@ export default function QuestionPhase() {
                                 相手プレイヤーの準備を待っています... ({readyPlayers.size}/2)
                             </p>
                         </div>
-                    ) : isStarted && formula.question ? (
+                    ) : isStarted && formula && formula.question ? (
                         <div>
                             <p className="text-lg mb-2">{formula.question} = ?</p>
                             <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>

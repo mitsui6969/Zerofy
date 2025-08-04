@@ -118,8 +118,8 @@ func NewRoomManager() *RoomManager {
 // Room -> RoomResponse 変換関数
 func ToRoomResponse(r *Room) RoomResponse {
 	players := []string{}
-	for _, p := range r.Players { // ここは実際のプレイヤー管理に合わせて修正
-		players = append(players, p.Name)
+	for _, p := range r.Players {
+		players = append(players, p.ID) // ←ここをp.Nameからp.IDに修正
 	}
 	return RoomResponse{
 		ID:      r.ID,
@@ -282,14 +282,14 @@ func (r *Room) ProcessAnswer(playerID string, answer int) (string, error) {
 	defer r.mutex.Unlock()
 
 	// プレイヤーが存在するかチェック
-	player, exists := r.Players[playerID]
+	_, exists := r.Players[playerID]
 	if !exists {
 		return "", ErrPlayerNotFound
 	}
 
 	// 式が存在するかチェック
 	if r.CurrentFormula == nil {
-		return "", errors.New("no formula available")
+		return "", errors.New("no formula")
 	}
 
 	// 既に勝者が決まっている場合は何もしない
@@ -298,20 +298,13 @@ func (r *Room) ProcessAnswer(playerID string, answer int) (string, error) {
 	}
 
 	// 正解かどうかチェック
-	if answer != r.CurrentFormula.Answer {
-		return "", nil // 不正解の場合は勝者なし
+	if answer == r.CurrentFormula.Answer {
+		// 先着で正解したプレイヤーが勝者
+		r.winner = playerID
+		return playerID, nil
 	}
 
-	// 正解の場合、そのプレイヤーが勝者（最初に正解したプレイヤー）
-	r.winner = playerID
-
-	// ポイント処理：勝ったプレイヤーのポイントを減らす
-	player.Point -= player.Bet
-	if player.Point < 0 {
-		player.Point = 0
-	}
-
-	return r.winner, nil
+	return "", nil
 }
 
 // GetPlayerList プレイヤーIDのリストを取得

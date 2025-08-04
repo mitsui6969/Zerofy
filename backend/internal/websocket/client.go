@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/mitsui6969/Zerofy/backend/internal/matching/room"
+	"github.com/mitsui6969/Zerofy/backend/internal/game"
 )
 
 const (
@@ -133,26 +134,48 @@ func (c *Client) readPump() {
 					}
 				}
 
-				// 勝敗判定とポイント処理
+				// 勝敗判定後
 				if answer, ok := msg["Answer"].(float64); ok {
 					winner, err := c.room.ProcessAnswer(c.playerID, int(answer))
 					if err != nil {
 						log.Printf("Error processing answer: %v", err)
 					} else if winner != "" {
-						log.Printf("=== 勝敗判定ログ ===")
-						log.Printf("勝者: %s", winner)
-						log.Printf("回答: %d", int(answer))
+						// プレイヤー情報取得
+						p1 := c.room.GetPlayer1()
+						p2 := c.room.GetPlayer2()
+						formula := c.room.GetFormula()
 
-						// 勝者のポイントを取得してログ出力
-						if point, err := c.room.GetPlayerPoint(winner); err == nil {
-							log.Printf("勝者の更新後ポイント: %d", point)
-						}
+						// ポイント計算
+						result := game.PointControl(
+							game.PlayerPointInfo{ID: p1.ID, Point: p1.Point},
+							game.PlayerPointInfo{ID: p2.ID, Point: p2.Point},
+							winner,
+							formula.Question,
+						)
+
+						// ポイントをroomのプレイヤーに反映
+						c.room.Players[p1.ID].Point = result.P1Point
+						c.room.Players[p2.ID].Point = result.P2Point
+
+						// ラウンドログを残す
+						game.AddRoundResult(
+							game.PlayerPoint{ID: p1.ID, Point: result.P1Point},
+							game.PlayerPoint{ID: p2.ID, Point: result.P2Point},
+							c.room,
+						)
 
 						// 勝敗結果を全員に送信
 						resultMsg := map[string]interface{}{
 							"type":   "RESULT",
 							"winner": winner,
 							"answer": int(answer),
+							"winnerPoint": func() int {
+								if winner == p1.ID {
+									return result.P1Point
+								}
+								return result.P2Point
+							}(),
+							"decrease": result.Decrease,
 						}
 						resultData, _ := json.Marshal(resultMsg)
 						c.hub.broadcast <- Broadcast{
@@ -160,12 +183,26 @@ func (c *Client) readPump() {
 							Message: resultData,
 						}
 
-						// 勝敗結果送信後に準備状態をリセット（次のラウンドの準備）
+						// client.go の勝敗処理後
+						if result.P1Point == 0 || result.P2Point == 0 {
+							// ゲーム終了メッセージ
+							gameOverMsg := map[string]interface{}{
+								"type": "END",
+								"winner": func() string {
+									if result.P1Point == 0 {
+										return p2.ID
+									}
+									return p1.ID
+								}(),
+							}
+							gameOverData, _ := json.Marshal(gameOverMsg)
+							c.hub.broadcast <- Broadcast{
+								RoomID:  c.room.ID,
+								Message: gameOverData,
+							}
+						}
+
 						c.room.ResetPlayerReady()
-					} else {
-						log.Printf("=== 回答処理ログ ===")
-						log.Printf("プレイヤーID: %s", c.playerID)
-						log.Printf("回答: %d (不正解または既に勝者決定済み)", int(answer))
 					}
 				}
 
