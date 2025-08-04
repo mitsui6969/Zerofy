@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+	// "github.com/mitsui6969/Zerofy/backend/internal/game"
 )
 
 type Player struct {
@@ -44,6 +45,15 @@ type Room struct {
 	roundResults   []RoundResult
 	CurrentFormula *Formula
 	winner         string // 現在のラウンドの勝者
+
+	RoundLogs []RoundLog // ラウンドのログ
+}
+
+type RoundLog struct {
+	Round      int    `json:"round"`
+	Formula    string `json:"formula"`
+	Answer     float64    `json:"answer"`
+	AnsweredBy string `json:"answeredBy"`
 }
 
 func (r *Room) AddRoundResults(P1id string, P1po int, P2id string, P2po int) {

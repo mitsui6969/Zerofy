@@ -38,7 +38,7 @@ func PointControl(P1 PlayerPointInfo, P2 PlayerPointInfo, winner string, formula
 			P2Point:  P2.Point,
 			Winner:   winner,
 			Decrease: 0,
-			Err:      errors.New("Either Point Zero"),
+			Err:      errors.New("either Point Zero"),
 		}
 	}
 
