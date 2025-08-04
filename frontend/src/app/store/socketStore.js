@@ -52,9 +52,9 @@ export const useSocketStore = create((set, get) => ({
                             // サーバーから自分のIDを受け取る
                             const myId = message.playerID;
                             // 相手のIDは自分以外
-                            const opponentId = message.room.players.find(id => id !== myId) || null;
-                            playerStore.initPlayers(myId, opponentId);
-                            console.log('プレイヤーストアを初期化しました:', { myId, opponentId });
+                            const opponentId = message.room.players.find(id => id !== myId);
+                            playerStore.initPlayers(myId, opponentId || null);
+                            console.log('プレイヤーストアを初期化しました:', { myId, opponentId: opponentId || null });
                         }
                         return;
                     }
@@ -144,11 +144,13 @@ export const useSocketStore = create((set, get) => ({
                             // プレイヤーストアの相手IDを更新（2人目のプレイヤーが参加した場合）
                             if (message.room && message.room.players && message.room.players.length >= 2) {
                                 const playerStore = usePlayerStore.getState();
-                                const myId = message.room.players[0];
-                                const opponentId = message.room.players[1];
-                                if (playerStore.myPlayer.id !== myId || playerStore.opponent.id !== opponentId) {
-                                    playerStore.initPlayers(myId, opponentId);
-                                    console.log('プレイヤーストアを更新しました:', { myId, opponentId });
+                                // 現在の自分のIDを保持
+                                const currentMyId = playerStore.myPlayer.id;
+                                // 相手のIDは自分以外
+                                const opponentId = message.room.players.find(id => id !== currentMyId);
+                                if (opponentId && playerStore.opponent.id !== opponentId) {
+                                    playerStore.initPlayers(currentMyId, opponentId);
+                                    console.log('プレイヤーストアを更新しました:', { myId: currentMyId, opponentId });
                                 }
                             }
                         }
