@@ -1,0 +1,100 @@
+/* 黒背景全体ラッパー */
+.question-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #000000;
+    padding: 1rem;
+}
+
+/* 中央のボックス */
+.question-box {
+    max-width: 600px;
+    width: 100%; /* 追加：横幅いっぱいを許容 */
+    margin: 0 auto;
+    background-color: #000000;
+    color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    /* box-shadowの色を白系に調整 */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* 数式表示 */
+.expression,
+.text-lg.mb-2 {
+    font-size: 5rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: white;
+}
+
+/* 解答エリアの横並び調整 */
+.answer-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+/* 入力欄の上書き（Tailwind: border p-2 mr-2） */
+input[type="text"].border {
+    border: 1px solid #444444;
+    background-color: #222222;
+    color: white;
+    padding: 1rem 1rem;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    width: 12rem;
+    margin-right: 1rem;
+}
+
+/* ボタンの上書き（Tailwind: bg-green-500...） */
+button.bg-green-500 {
+    background-color: #cb3842;
+    color: white;
+    padding: 1rem 1.2rem;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button.bg-green-500:hover:enabled {
+    background-color: #ab1b1b;
+}
+
+button.bg-green-500:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 経過時間（Tailwind: mt-4 text-blue-600） */
+.text-blue-600 {
+    color: #2563eb !important;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+/* 間違いメッセージ */
+.bg-red-100.border.border-red-400 {
+    background-color: #ffe5e5;
+    border-color: #ffaaaa;
+    color: #ff0000;
+    font-weight: bold;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* カウントダウン表示（text-6xlなど） */
+.text-6xl {
+    font-size: 6rem;
+    font-weight: bold;
+    color: #ff5555;
+    margin-bottom: 2rem;
+    text-align: center;
+}
