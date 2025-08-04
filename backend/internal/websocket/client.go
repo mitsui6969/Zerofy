@@ -22,6 +22,7 @@ type Client struct {
 	conn     *websocket.Conn
 	send     chan []byte
 	room     *room.Room
+	roomM    *room.RoomManager
 	playerID string
 }
 
@@ -105,9 +106,9 @@ func (c *Client) readPump() {
 						log.Printf("Sent formula to all players: %s", formula.Question)
 					}()
 				}
-			case "Bet":
+			case "QUESTION":
 				// ベットメッセージの処理
-				if bet, ok := msg["Bet"].(float64); ok {
+				if bet, ok := msg["QUESTION"].(float64); ok {
 					err := c.room.SetPlayerBet(c.playerID, int(bet))
 					if err != nil {
 						log.Printf("Error setting bet: %v", err)
@@ -115,11 +116,21 @@ func (c *Client) readPump() {
 						log.Printf("Player %s bet: %d", c.playerID, int(bet))
 					}
 				}
+				// RoundLogを作成して記録
+				formula := c.room.GetFormula()
+				roundLog := room.RoundLog{
+					Round:      len(c.room.RoundLogs) +1,
+					Formula:    formula.Question,
+					Answer:     formula.Answer,
+					AnsweredBy: c.playerID,
+				}
+				c.room.AddRoundLog(roundLog)
 				// ベットメッセージもブロードキャスト
 				c.hub.broadcast <- Broadcast{
 					RoomID:  c.room.ID,
 					Message: message,
 				}
+				
 			case "Answer":
 				// 回答メッセージの処理
 				if answer, ok := msg["Answer"].(float64); ok {
@@ -166,6 +177,7 @@ func (c *Client) readPump() {
 
 						// 勝敗結果を全員に送信
 						resultMsg := map[string]interface{}{
+							"roundLogs": c.room.RoundLogs,
 							"type":   "RESULT",
 							"winner": winner,
 							"answer": float64(answer),
@@ -186,19 +198,15 @@ func (c *Client) readPump() {
 						// client.go の勝敗処理後
 						if result.P1Point == 0 || result.P2Point == 0 {
 							// ゲーム終了メッセージ
-							gameOverMsg := map[string]interface{}{
-								"type": "END",
-								"winner": func() string {
-									if result.P1Point == 0 {
-										return p2.ID
-									}
-									return p1.ID
-								}(),
+							endMsg := map[string]interface{}{
+								"type":      "END",
+								"winner":    winner,
+								"roundLogs": c.room.RoundLogs,
 							}
-							gameOverData, _ := json.Marshal(gameOverMsg)
+							res, _ := json.Marshal(endMsg)
 							c.hub.broadcast <- Broadcast{
 								RoomID:  c.room.ID,
-								Message: gameOverData,
+								Message: res,
 							}
 						}
 

@@ -214,3 +214,9 @@ func (rm *RoomManager) GetRoomCount() int {
 	// 管理中のルーム総数を返す
 	return len(rm.rooms)
 }
+// AddRoundLog: ラウンドログを部屋に追加
+func (r *Room) AddRoundLog(log RoundLog) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	r.RoundLogs = append(r.RoundLogs, log)
+}
