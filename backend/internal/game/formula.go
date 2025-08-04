@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 
@@ -11,7 +12,8 @@ import (
 
 type Formula struct {
 	Question string
-	Answer   int
+	Answer   float64
+	Point   int
 }
 
 func CreateFormula() Formula {
@@ -29,22 +31,29 @@ func CreateFormula() Formula {
 	Question := fmt.Sprintf("%d %s %d", randomNumber1, operator, randomNumber2)
 
 	//生成された式の答えを計算
-	Answer := 0
+	Answer := 0.0
+	Point := 0
 	switch operator {
 	case "+":
-		Answer = randomNumber1 + randomNumber2
+		Answer = float64(randomNumber1) + float64(randomNumber2)
+		Point = 2
 	case "-":
-		Answer = randomNumber1 - randomNumber2
+		Answer = float64(randomNumber1) - float64(randomNumber2)
+		Point = 2
 	case "×":
-		Answer = randomNumber1 * randomNumber2
+		Answer = float64(randomNumber1) * float64(randomNumber2)
+		Point = 5
 	case "÷":
+		Point = 5
 		// 0除算が起こらない前提
-		Answer = randomNumber1 / randomNumber2
+		rawAnswer := float64(randomNumber1) / float64(randomNumber2)
+		Answer = math.Round(rawAnswer*10) / 10
 	}
 
 	return Formula{
 		Question: Question,
 		Answer:   Answer,
+		Point:    Point,
 	}
 }
 

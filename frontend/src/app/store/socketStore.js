@@ -47,12 +47,12 @@ export const useSocketStore = create((set, get) => ({
                     // JOIN_SUCCESS の場合は WAIT に設定
                     if (message.type === 'JOIN_SUCCESS') {
                         set({ room: message.room, phase: 'WAIT' });
-                        
-                        // プレイヤーストアを初期化
                         const playerStore = usePlayerStore.getState();
-                        if (message.room && message.room.players) {
-                            const myId = message.room.players[0]; // 最初のプレイヤーが自分
-                            const opponentId = message.room.players[1] || null; // 2番目のプレイヤーが相手
+                        if (message.room && message.room.players && message.playerID) {
+                            // サーバーから自分のIDを受け取る
+                            const myId = message.playerID;
+                            // 相手のIDは自分以外
+                            const opponentId = message.room.players.find(id => id !== myId) || null;
                             playerStore.initPlayers(myId, opponentId);
                             console.log('プレイヤーストアを初期化しました:', { myId, opponentId });
                         }
@@ -103,43 +103,34 @@ export const useSocketStore = create((set, get) => ({
                     if (message.type === 'RESULT') {
                         const playerStore = usePlayerStore.getState();
                         const isWinner = message.winner === playerStore.myPlayer.id;
-                        
-                        console.log('=== RESULTメッセージ受信ログ ===');
-                        console.log('勝者:', message.winner);
-                        console.log('自分のID:', playerStore.myPlayer.id);
-                        console.log('正解:', message.answer);
-                        console.log('自分が勝者か:', isWinner);
-                        
+
+                        // ポイントをサーバー値で直接上書き
+                        if (isWinner) {
+                            playerStore.setMyPoint(message.winnerPoint);
+                        } else if (message.winner === playerStore.opponent.id) {
+                            playerStore.setOpponentPoint(message.winnerPoint);
+                        }
+
                         set({ 
                             phase: 'RESULT',
                             winner: message.winner,
                             correctAnswer: message.answer,
-                            formula: null, // 次のラウンドのために計算式をクリア
-                            isIncorrect: !isWinner, // 勝者でない場合は不正解
-                            incorrectAnswer: !isWinner ? message.answer : null // 不正解の場合は正解を表示
+                            formula: null,
+                            isIncorrect: !isWinner,
+                            incorrectAnswer: !isWinner ? message.answer : null
                         });
-                        
-                        // プレイヤーストアのポイントを更新
-                        if (playerStore.myPlayer.bet !== null && playerStore.opponent.bet !== null) {
-                            playerStore.processResult(message.winner, playerStore.myPlayer.bet, playerStore.opponent.bet);
-                            
-                            // 更新後のポイントをログ出力
-                            const updatedState = usePlayerStore.getState();
-                            console.log('=== 勝敗結果受信ログ ===');
-                            console.log('更新後の自分のポイント:', updatedState.myPlayer.point);
-                            console.log('更新後の相手のポイント:', updatedState.opponent.point);
-                        } else {
-                            console.log('=== 勝敗結果受信ログ ===');
-                            console.log('ベット情報が不完全なため、ポイント更新をスキップします');
-                            console.log('自分のベット:', playerStore.myPlayer.bet);
-                            console.log('相手のベット:', playerStore.opponent.bet);
-                        }
-                        
+
+                        return;
+                    }
+
+                    // 終了メッセージ
+                    if (message.type === 'END') {
+                        set({ phase: 'END', winner: message.winner });
                         return;
                     }
 
                     // フェーズ系のメッセージならphase更新
-                    if (['BET', 'QUESTION', 'RESULT'].includes(message.type)) {
+                    if (['END', 'QUESTION', 'RESULT'].includes(message.type)) {
                         set({ phase: message.type });
 
                         // QUESTIONメッセージの場合は式も保存
