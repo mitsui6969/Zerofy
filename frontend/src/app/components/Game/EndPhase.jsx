@@ -12,11 +12,8 @@ export default function EndPhase() {
     const cleanup = useSocketStore(state => state.cleanup);
 
     const handleHomeClick = () => {
-        cleanup();                   // Zustandの状態リセット＆WebSocket切断
-        router.push('/');             // ホームへ移動
-        setTimeout(() => {
-            window.location.reload(); // 強制リロードで完全初期化
-        }, 100); 
+        cleanup();        // 状態リセット＆WebSocket切断
+        router.push('/'); // ホームへ移動
     };
 
     return (
