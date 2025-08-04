@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSocketStore } from '../../store/socketStore';
-
+import '../../style/Question.css';
 export default function QuestionPhase() {
     const { socket, isConnected } = useSocketStore();
     const [expression, setExpression] = useState(""); // 式を保持
@@ -60,13 +60,41 @@ export default function QuestionPhase() {
                 startTimeRef.current = Date.now();
             }
         };
-
+    
         document.addEventListener('keydown', handleStartGame);
 
         return () => {
             document.removeEventListener('keydown', handleStartGame);
         };
     }, [isStarted]);
+useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+        if (document.activeElement === inputRef.current) return;
+
+        if (e.key.match(/^[0-9.-]$/)) {
+            e.preventDefault();
+
+            setAnswer((prev) => {
+                const newValue = prev + e.key;
+                if (newValue.match(/^-?[0-9.]*$/)) {
+                    return newValue;
+                }
+                return prev;
+            });
+
+            if (inputRef.current) {
+                inputRef.current.focus();
+            }
+        }
+    };
+
+    document.addEventListener('keydown', handleGlobalKeyDown);
+    return () => {
+        document.removeEventListener('keydown', handleGlobalKeyDown);
+    };
+}, []);
+
+
 
     // 入力フィールドにフォーカス
     useEffect(() => {
@@ -106,44 +134,52 @@ export default function QuestionPhase() {
     };
 
     return (
-        <div>
-            <h2 className="text-xl font-bold mb-4">計算式に答えてください！</h2>
-            {isStarted ? (
-                expression ? (
-                    <p className="text-lg mb-4">{expression} = ?</p>
-                ) : (
-                    <p>問題を待機中...</p>
-                )
+        <div className="question-container">
+            <div className="question-box">
+                <h2 className="title">計算式に答えてください！</h2>
+
+        {isStarted ? (
+            expression ? (
+            <p className="expression">{expression} = ?</p>
             ) : (
-                <p>スペースキーで準備完了！<br />Enterで解答を送信できます！</p>
-            )}
+            <p className="waiting">問題を待機中...</p>
+            )
+        ) : (
+        <p className="instructions">
+            スペースキーで準備完了！<br />Enterで解答を送信できます！
+            </p>
+        )}
+
+        <div className="input-row">
             <input
-                type="text"
-                value={answer}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    if (value.match(/^-?[0-9.]*$/)) {
-                        setAnswer(value);
-                    }
-                }}
-                onKeyDown={handleKeyDown}
-                ref={inputRef}
-                className="border p-2 mr-2"
-                disabled={!isStarted}
+            type="text"
+            value={answer}
+            onChange={(e) => {
+                const value = e.target.value;
+                if (value.match(/^-?[0-9.]*$/)) {
+                setAnswer(value);
+                }
+            }}
+            onKeyDown={handleKeyDown}
+            ref={inputRef}
+            className="answer-input"
+            disabled={!isStarted}
             />
             <button
-                onClick={handleSubmit}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-                disabled={!isStarted}
+            onClick={handleSubmit}
+            className="submit-button"
+            disabled={!isStarted}
             >
-                解答
+            解答
             </button>
-            {/* ここで経過時間を表示 */}
-            {elapsedMs !== null && (
-                <p className="mt-4 text-blue-600">
-                    回答までの時間: {(elapsedMs / 1000).toFixed(2)} 秒
-                </p>
-            )}
         </div>
+
+        {elapsedMs !== null && (
+            <p className="elapsed-time">
+            回答までの時間: {(elapsedMs / 1000).toFixed(2)} 秒
+            </p>
+        )}
+        </div>
+    </div>
     );
 }

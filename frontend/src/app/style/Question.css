@@ -1,0 +1,64 @@
+.question-box {
+    max-width: 600px; /* 幅を制限 */
+    margin: 0 auto; /* 水平方向中央配置 */
+    background-color: #000000;
+    color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.expression {
+    font-size: 5rem; /* 今は3remなので大きくしました */
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-align: center; /* 真ん中揃え */
+}
+
+
+    /* 他のテキストも白にしたいなら .question-box内のcolorで対応済み */
+
+    .answer-input {
+    border: 1px solid #444444; /* 黒背景に馴染むグレー */
+    background-color: #222222; /* 少し明るめの黒で入力欄目立たせる */
+    color: white; /* 文字は白 */
+    padding: 1rem 1rem;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    width: 12rem;
+    margin-right: 1rem;
+    }
+
+    .submit-button {
+    background-color: #cb3842;
+    color: white;
+    padding: 1rem 1.2rem;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    }
+
+    .submit-button:hover:enabled {
+    background-color: #ab1b1b;
+    }
+
+    .submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    }
+
+    .elapsed-time {
+    color: #2563eb;
+    font-weight: 500;
+    }
+.question-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  background-color: #000000; /* 黒背景 */
+  padding: 1rem; /* 余白調整 */
+}
