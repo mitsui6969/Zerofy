@@ -12,6 +12,46 @@ body {
   color: white;
 }
 
+.box {
+  width: 500px; 
+  margin-top: 100px;
+  margin: 50px auto; 
+  background-color: #2b2b2b;
+  border-radius: 10px;
+  color: #e0e0e0; 
+  padding: 10px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
+}
+.name{
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  border-bottom: solid 1px white; 
+  margin-bottom: 20px;
+}
+.mypoint{
+  font-size: 20px;
+  margin-top: 10px;
+  text-align: center;
+}
+.yourpoint{
+  font-size: 20px;
+  margin-top: 10px;
+  text-align: center;
+}
+.correct-answer {
+  font-size: 20px;
+  margin-top: 20px;
+  text-align: center;
+  border-radius: 100%;
+  border-color: white;
+}
+.again{
+  font-size: 16px;
+  margin-top: 60px;
+  text-align: center;
+}
+
 #score-container {
   padding: 40px;
   max-width: 800px;
