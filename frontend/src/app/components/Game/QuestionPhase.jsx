@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSocketStore } from '../../store/socketStore';
 import { usePlayerStore } from '../../features/payer/playerStore';
+import '../../style/Question.css';
 
 export default function QuestionPhase() {
     const { socket, isConnected, readyPlayers, formula, currentPoints, resetReadyState, resetIncorrectState, phase, isIncorrect } = useSocketStore();
@@ -222,115 +223,114 @@ export default function QuestionPhase() {
                     </div>
                 </div>
             </div>
-            </div>
-        )}
-{!isReady ? (
-    <div className="ready-message-center">
-    <p className="ready-message-large">スペースキーで準備完了！</p>
-    <p className="ready-message-small">両プレイヤーが準備完了すると問題が表示されます</p>
-</div>
-
         
-) : (
+            {!isReady ? (
+                <div className="ready-message-center">
+                    <p className="ready-message-large">スペースキーで準備完了！</p>
+                    <p className="ready-message-small">両プレイヤーが準備完了すると問題が表示されます</p>
+                </div>
 
-        <div>
-            {countdown !== null ? (
-                <div className="text-center">
-                <div className="text-6xl font-bold text-red-600 mb-4">
-                    {countdown === 'start' ? 'Start!' : countdown}
-                </div>
-                <p className="text-lg text-gray-600">
-                    {countdown === 'start' ? 'ゲーム開始！' : '準備してください！'}
-                </p>
-                </div>
-            ) : !isStarted ? (
-                <div>
-                    <p className="text-lg mb-4">スペースキーで準備完了！</p>
-                    <p className="text-sm text-gray-600">両プレイヤーが準備完了すると同時に問題が表示されます</p>
-                </div>
             ) : (
                 <div>
                     {countdown !== null ? (
                         <div className="text-center">
-                            <div className="text-6xl font-bold text-red-600 mb-4">
-                                {countdown === 'start' ? 'Start!' : countdown}
-                            </div>
-                            <p className="text-lg text-gray-600">
-                                {countdown === 'start' ? 'ゲーム開始！' : '準備してください！'}
-                            </p>
+                        <div className="text-6xl font-bold text-red-600 mb-4">
+                            {countdown === 'start' ? 'Start!' : countdown}
+                        </div>
+                        <p className="text-lg text-gray-600">
+                            {countdown === 'start' ? 'ゲーム開始！' : '準備してください！'}
+                        </p>
                         </div>
                     ) : !isStarted ? (
                         <div>
-                            <p className="text-lg mb-4 text-green-600">✓ 準備完了！</p>
-                            <p className="text-sm text-gray-600">
-                                相手プレイヤーの準備を待っています... ({readyPlayers.size}/2)
-                            </p>
-                        </div>
-                    ) : isStarted && formula && formula.question ? (
-                        <div>
-                            <p className="text-lg mb-2">{formula.question} = ?</p>
-                            <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>
-                            <p className="text-sm text-gray-600 mb-2">
-                                操作: 数字キーで入力 → Enterで送信 → Deleteで1文字削除 → Escでクリア
-                            </p>
-
-                            {/* 入力欄 */}
-                            <div>
-                                <input
-                                    type="text"
-                                    value={answer}
-                                    onKeyDown={handleKeyDown}
-                                    ref={inputRef}
-                                    className="border p-2 mr-2"
-                                    placeholder="キーボードで数字を入力してください"
-                                    readOnly
-                                />
-                                <button
-                                    onClick={handleSubmit}
-                                    className="bg-green-500 text-white px-4 py-2 rounded"
-                                >
-                                    解答
-                                </button>
-                            </div>
+                            <p className="text-lg mb-4">スペースキーで準備完了！</p>
+                            <p className="text-sm text-gray-600">両プレイヤーが準備完了すると同時に問題が表示されます</p>
                         </div>
                     ) : (
                         <div>
-                            <p className="text-lg mb-2">問題を待機中...</p>
-                            <p className="text-sm text-gray-600">計算式を受信中...</p>
-                        </div>
-                    )}
-                    
-                    {/* {isStarted && formula && (
-                        <>
-                            <input
-                                type="text"
-                                value={answer}
-                                onKeyDown={handleKeyDown}
-                                ref={inputRef}
-                                className="border p-2 mr-2"
-                                placeholder="キーボードで数字を入力してください"
-                                readOnly
-                            />
-                            <button
-                                onClick={handleSubmit}
-                                className="bg-green-500 text-white px-4 py-2 rounded"
-                            >
-                                解答
-                            </button>
-                        </>
-                    )} */}
-                    
-                    {/* ここで経過時間を表示 */}
-                    {elapsedMs !== null && (
-                        <p className="mt-4 text-blue-600">
-                            {submittedAnswer}
-                        </p>
-                    )}
-                    
-                    {/* 不正解表示 */}
-                    {isIncorrect && submittedAnswer !== null && (
-                        <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded">
-                            <p className="text-red-700 font-semibold">× {submittedAnswer}</p>
+                            {countdown !== null ? (
+                                <div className="text-center">
+                                    <div className="text-6xl font-bold text-red-600 mb-4">
+                                        {countdown === 'start' ? 'Start!' : countdown}
+                                    </div>
+                                    <p className="text-lg text-gray-600">
+                                        {countdown === 'start' ? 'ゲーム開始！' : '準備してください！'}
+                                    </p>
+                                </div>
+                            ) : !isStarted ? (
+                                <div>
+                                    <p className="text-lg mb-4 text-green-600">✓ 準備完了！</p>
+                                    <p className="text-sm text-gray-600">
+                                        相手プレイヤーの準備を待っています... ({readyPlayers.size}/2)
+                                    </p>
+                                </div>
+                            ) : isStarted && formula && formula.question ? (
+                                <div>
+                                    <p className="text-lg mb-2">{formula.question} = ?</p>
+                                    <p className="text-sm text-blue-600 mb-4">この問題のポイント: {currentPoints}点</p>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        操作: 数字キーで入力 → Enterで送信 → Deleteで1文字削除 → Escでクリア
+                                    </p>
+
+                                    {/* 入力欄 */}
+                                    <div>
+                                        <input
+                                            type="text"
+                                            value={answer}
+                                            onKeyDown={handleKeyDown}
+                                            ref={inputRef}
+                                            className="border p-2 mr-2"
+                                            placeholder="キーボードで数字を入力してください"
+                                            readOnly
+                                        />
+                                        <button
+                                            onClick={handleSubmit}
+                                            className="bg-green-500 text-white px-4 py-2 rounded"
+                                        >
+                                            解答
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div>
+                                    <p className="text-lg mb-2">問題を待機中...</p>
+                                    <p className="text-sm text-gray-600">計算式を受信中...</p>
+                                </div>
+                            )}
+                            
+                            {/* {isStarted && formula && (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={answer}
+                                        onKeyDown={handleKeyDown}
+                                        ref={inputRef}
+                                        className="border p-2 mr-2"
+                                        placeholder="キーボードで数字を入力してください"
+                                        readOnly
+                                    />
+                                    <button
+                                        onClick={handleSubmit}
+                                        className="bg-green-500 text-white px-4 py-2 rounded"
+                                    >
+                                        解答
+                                    </button>
+                                </>
+                            )} */}
+                            
+                            {/* ここで経過時間を表示 */}
+                            {elapsedMs !== null && (
+                                <p className="mt-4 text-blue-600">
+                                    {submittedAnswer}
+                                </p>
+                            )}
+                            
+                            {/* 不正解表示 */}
+                            {isIncorrect && submittedAnswer !== null && (
+                                <div className="mt-4 p-3 bg-red-100 border border-red-400 rounded">
+                                    <p className="text-red-700 font-semibold">× {submittedAnswer}</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
